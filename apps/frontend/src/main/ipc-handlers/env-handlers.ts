@@ -598,14 +598,14 @@ ${existingVars['GRAPHITI_DB_PATH'] ? `GRAPHITI_DB_PATH=${existingVars['GRAPHITI_
         return { success: false, error: resolved.error };
       }
       const iflowCmd = resolved.command;
-      const claudeEnv = resolved.env;
+      const iflowEnv = resolved.env;
 
       try {
         // Check if Claude CLI is available and authenticated
         const result = await new Promise<ClaudeAuthResult>((resolve) => {
           const proc = spawn(getSpawnCommand(iflowCmd), ['--version'], getSpawnOptions(iflowCmd, {
             cwd: project.path,
-            env: claudeEnv,
+            env: iflowEnv,
           }));
 
           let _stdout = '';
@@ -625,7 +625,7 @@ ${existingVars['GRAPHITI_DB_PATH'] ? `GRAPHITI_DB_PATH=${existingVars['GRAPHITI_
               // Run a simple command that requires auth
               const authCheck = spawn(getSpawnCommand(iflowCmd), ['api', '--help'], getSpawnOptions(iflowCmd, {
                 cwd: project.path,
-                env: claudeEnv,
+                env: iflowEnv,
               }));
 
               authCheck.on('close', (authCode: number | null) => {
@@ -687,14 +687,14 @@ ${existingVars['GRAPHITI_DB_PATH'] ? `GRAPHITI_DB_PATH=${existingVars['GRAPHITI_
         return { success: false, error: resolved.error };
       }
       const iflowCmd = resolved.command;
-      const claudeEnv = resolved.env;
+      const iflowEnv = resolved.env;
 
       try {
         // Run claude setup-token which will open browser for OAuth
         const result = await new Promise<ClaudeAuthResult>((resolve) => {
           const proc = spawn(getSpawnCommand(iflowCmd), ['setup-token'], getSpawnOptions(iflowCmd, {
             cwd: project.path,
-            env: claudeEnv,
+            env: iflowEnv,
             stdio: 'inherit' // This allows the terminal to handle the interactive auth
           }));
 

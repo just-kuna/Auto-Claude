@@ -4,7 +4,7 @@
  */
 
 import * as OutputParser from './output-parser';
-import * as ClaudeIntegration from './claude-integration-handler';
+import * as ClaudeIntegration from './iflow-integration-handler';
 import type { TerminalProcess, WindowGetter } from './types';
 import { IPC_CHANNELS } from '../../shared/constants';
 

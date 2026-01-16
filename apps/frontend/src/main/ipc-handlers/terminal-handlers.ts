@@ -3,7 +3,7 @@ import type { BrowserWindow } from 'electron';
 import { IPC_CHANNELS } from '../../shared/constants';
 import type { IPCResult, TerminalCreateOptions, IFlowProfile, IFlowProfileSettings, IFlowUsageSnapshot } from '../../shared/types';
 import { getIFlowProfileManager } from '../iflow-profile-manager';
-import { getUsageMonitor } from '../claude-profile/usage-monitor';
+import { getUsageMonitor } from '../iflow-profile/usage-monitor';
 import { TerminalManager } from '../terminal-manager';
 import { projectStore } from '../project-store';
 import { terminalNameGenerator } from '../terminal-name-generator';

@@ -16,7 +16,7 @@ import { promisify } from 'util';
 import { IPC_CHANNELS, DEFAULT_APP_SETTINGS } from '../../shared/constants';
 import type { IPCResult } from '../../shared/types';
 import type { ClaudeCodeVersionInfo, ClaudeInstallationList, ClaudeInstallationInfo } from '../../shared/types/cli';
-import { getToolInfo, configureTools, sortNvmVersionDirs, getClaudeDetectionPaths } from '../cli-tool-manager';
+import { getToolInfo, configureTools, sortNvmVersionDirs, getIFlowDetectionPaths } from '../cli-tool-manager';
 import { readSettingsFile, writeSettingsFile } from '../settings-utils';
 import { isSecurePath } from '../utils/windows-paths';
 import semver from 'semver';
@@ -87,10 +87,10 @@ async function validateClaudeCliAsync(cliPath: string): Promise<[boolean, string
  * Scan all known locations for Claude CLI installations.
  * Returns all found installations with their paths, versions, and sources.
  *
- * Uses getClaudeDetectionPaths() from cli-tool-manager.ts as the single source
+ * Uses getToolInfo() from cli-tool-manager.ts as the single source
  * of truth for detection paths to avoid duplication and ensure consistency.
  *
- * @see cli-tool-manager.ts getClaudeDetectionPaths() for path configuration
+ * @see cli-tool-manager.ts getToolInfo() for path configuration
  */
 async function scanClaudeInstallations(activePath: string | null): Promise<ClaudeInstallationInfo[]> {
   const installations: ClaudeInstallationInfo[] = [];
@@ -99,7 +99,7 @@ async function scanClaudeInstallations(activePath: string | null): Promise<Claud
   const isWindows = process.platform === 'win32';
 
   // Get detection paths from cli-tool-manager (single source of truth)
-  const detectionPaths = getClaudeDetectionPaths(homeDir);
+  const detectionPaths = getToolInfo(homeDir);
 
   const addInstallation = async (
     cliPath: string,
@@ -153,7 +153,7 @@ async function scanClaudeInstallations(activePath: string | null): Promise<Claud
     // which/where failed, continue with other methods
   }
 
-  // 3. Homebrew paths (macOS) - from getClaudeDetectionPaths
+  // 3. Homebrew paths (macOS) - from getToolInfo
   if (process.platform === 'darwin') {
     for (const p of detectionPaths.homebrewPaths) {
       await addInstallation(p, 'homebrew');
@@ -174,20 +174,20 @@ async function scanClaudeInstallations(activePath: string | null): Promise<Claud
     }
   }
 
-  // 5. Platform-specific standard locations - from getClaudeDetectionPaths
+  // 5. Platform-specific standard locations - from getToolInfo
   for (const p of detectionPaths.platformPaths) {
     await addInstallation(p, 'system-path');
   }
 
-  // 6. Additional common paths not in getClaudeDetectionPaths (for broader scanning)
+  // 6. Additional common paths not in getToolInfo (for broader scanning)
   const additionalPaths = isWindows
     ? [] // Windows paths are well covered by detectionPaths.platformPaths
     : [
-        path.join(homeDir, '.npm-global', 'bin', 'claude'),
-        path.join(homeDir, '.yarn', 'bin', 'claude'),
-        path.join(homeDir, '.claude', 'local', 'claude'),
-        path.join(homeDir, 'node_modules', '.bin', 'claude'),
-      ];
+      path.join(homeDir, '.npm-global', 'bin', 'claude'),
+      path.join(homeDir, '.yarn', 'bin', 'claude'),
+      path.join(homeDir, '.claude', 'local', 'claude'),
+      path.join(homeDir, 'node_modules', '.bin', 'claude'),
+    ];
 
   for (const p of additionalPaths) {
     await addInstallation(p, 'system-path');
