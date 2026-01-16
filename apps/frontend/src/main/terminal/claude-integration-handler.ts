@@ -14,7 +14,7 @@ import * as OutputParser from './output-parser';
 import * as SessionHandler from './session-handler';
 import { debugLog, debugError } from '../../shared/utils/debug-logger';
 import { escapeShellArg, buildCdCommand } from '../../shared/utils/shell-escape';
-import { getClaudeCliInvocation, getClaudeCliInvocationAsync } from '../claude-cli-utils';
+import { getIFlowCliInvocation, getIFlowCliInvocationAsync } from '../iflow-cli-utils';
 import type {
   TerminalProcess,
   WindowGetter,

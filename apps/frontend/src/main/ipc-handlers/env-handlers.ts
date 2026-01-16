@@ -8,7 +8,7 @@ import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { spawn } from 'child_process';
 import { projectStore } from '../project-store';
 import { parseEnvFile } from './utils';
-import { getClaudeCliInvocation, getClaudeCliInvocationAsync } from '../claude-cli-utils';
+import { getIFlowCliInvocation, getIFlowCliInvocationAsync } from '../iflow-cli-utils';
 import { debugError } from '../../shared/utils/debug-logger';
 import { getSpawnOptions, getSpawnCommand } from '../env-utils';
 
@@ -292,9 +292,9 @@ ${existingVars['PUPPETEER_MCP_ENABLED'] !== undefined ? `PUPPETEER_MCP_ENABLED=$
 # Format: AGENT_MCP_<agent_type>_REMOVE=server1,server2
 # =============================================================================
 ${Object.entries(existingVars)
-  .filter(([key]) => key.startsWith('AGENT_MCP_'))
-  .map(([key, value]) => `${key}=${value}`)
-  .join('\n') || '# No per-agent overrides configured'}
+        .filter(([key]) => key.startsWith('AGENT_MCP_'))
+        .map(([key, value]) => `${key}=${value}`)
+        .join('\n') || '# No per-agent overrides configured'}
 
 # =============================================================================
 # CUSTOM MCP SERVERS
@@ -479,7 +479,7 @@ ${existingVars['GRAPHITI_DB_PATH'] ? `GRAPHITI_DB_PATH=${existingVars['GRAPHITI_
       // Populate graphitiProviderConfig from .env file (embeddings only - no LLM provider)
       const embeddingProvider = vars['GRAPHITI_EMBEDDER_PROVIDER'];
       if (embeddingProvider || vars['AZURE_OPENAI_API_KEY'] ||
-          vars['VOYAGE_API_KEY'] || vars['GOOGLE_API_KEY'] || vars['OLLAMA_BASE_URL']) {
+        vars['VOYAGE_API_KEY'] || vars['GOOGLE_API_KEY'] || vars['OLLAMA_BASE_URL']) {
         config.graphitiProviderConfig = {
           embeddingProvider: (embeddingProvider as 'openai' | 'voyage' | 'azure_openai' | 'ollama' | 'google') || 'ollama',
           // OpenAI Embeddings

@@ -2,7 +2,7 @@ import path from 'path';
 import { getAugmentedEnv, getAugmentedEnvAsync } from './env-utils';
 import { getToolPath, getToolPathAsync } from './cli-tool-manager';
 
-export type ClaudeCliInvocation = {
+export type IFlowCliInvocation = {
   command: string;
   env: Record<string, string>;
 };
@@ -36,13 +36,13 @@ function ensureCommandDirInPath(command: string, env: Record<string, string>): R
 }
 
 /**
- * Returns the Claude CLI command path and an environment with PATH updated to include the CLI directory.
+ * Returns the iFlow CLI command path and an environment with PATH updated to include the CLI directory.
  *
  * WARNING: This function uses synchronous subprocess calls that block the main process.
- * For use in Electron main process, prefer getClaudeCliInvocationAsync() instead.
+ * For use in Electron main process, prefer getIFlowCliInvocationAsync() instead.
  */
-export function getClaudeCliInvocation(): ClaudeCliInvocation {
-  const command = getToolPath('claude');
+export function getIFlowCliInvocation(): IFlowCliInvocation {
+  const command = getToolPath('iflow');
   const env = getAugmentedEnv();
 
   return {
@@ -52,21 +52,21 @@ export function getClaudeCliInvocation(): ClaudeCliInvocation {
 }
 
 /**
- * Returns the Claude CLI command path and environment asynchronously (non-blocking).
+ * Returns the iFlow CLI command path and environment asynchronously (non-blocking).
  *
  * Safe to call from Electron main process without blocking the event loop.
  * Uses cached values if available for instant response.
  *
  * @example
  * ```typescript
- * const { command, env } = await getClaudeCliInvocationAsync();
+ * const { command, env } = await getIFlowCliInvocationAsync();
  * spawn(command, ['--version'], { env });
  * ```
  */
-export async function getClaudeCliInvocationAsync(): Promise<ClaudeCliInvocation> {
+export async function getIFlowCliInvocationAsync(): Promise<IFlowCliInvocation> {
   // Run both detections in parallel for efficiency
   const [command, env] = await Promise.all([
-    getToolPathAsync('claude'),
+    getToolPathAsync('iflow'),
     getAugmentedEnvAsync(),
   ]);
 
