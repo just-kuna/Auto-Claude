@@ -59,8 +59,8 @@ import type {
   TerminalWorktreeResult,
 } from './terminal';
 import type {
-  ClaudeProfileSettings,
-  ClaudeProfile,
+  IFlowProfileSettings,
+  IFlowProfile,
   ClaudeAutoSwitchSettings,
   ClaudeAuthResult,
   ClaudeUsageSnapshot
@@ -247,17 +247,17 @@ export interface ElectronAPI {
   onTerminalPendingResume: (callback: (id: string, sessionId?: string) => void) => () => void;
 
   // Claude profile management (multi-account support)
-  getClaudeProfiles: () => Promise<IPCResult<ClaudeProfileSettings>>;
-  saveClaudeProfile: (profile: ClaudeProfile) => Promise<IPCResult<ClaudeProfile>>;
-  deleteClaudeProfile: (profileId: string) => Promise<IPCResult>;
-  renameClaudeProfile: (profileId: string, newName: string) => Promise<IPCResult>;
-  setActiveClaudeProfile: (profileId: string) => Promise<IPCResult>;
+  getIFlowProfiles: () => Promise<IPCResult<IFlowProfileSettings>>;
+  saveIFlowProfile: (profile: IFlowProfile) => Promise<IPCResult<IFlowProfile>>;
+  deleteIFlowProfile: (profileId: string) => Promise<IPCResult>;
+  renameIFlowProfile: (profileId: string, newName: string) => Promise<IPCResult>;
+  setActiveIFlowProfile: (profileId: string) => Promise<IPCResult>;
   /** Switch terminal to use a different Claude profile (restarts Claude with new config) */
-  switchClaudeProfile: (terminalId: string, profileId: string) => Promise<IPCResult>;
+  switchIFlowProfile: (terminalId: string, profileId: string) => Promise<IPCResult>;
   /** Initialize authentication for a Claude profile */
-  initializeClaudeProfile: (profileId: string) => Promise<IPCResult>;
+  initializeIFlowProfile: (profileId: string) => Promise<IPCResult>;
   /** Set OAuth token for a profile (used when capturing from terminal) */
-  setClaudeProfileToken: (profileId: string, token: string, email?: string) => Promise<IPCResult>;
+  setIFlowProfileToken: (profileId: string, token: string, email?: string) => Promise<IPCResult>;
   /** Get auto-switch settings */
   getAutoSwitchSettings: () => Promise<IPCResult<ClaudeAutoSwitchSettings>>;
   /** Update auto-switch settings */
@@ -265,7 +265,7 @@ export interface ElectronAPI {
   /** Request usage fetch from a terminal (sends /usage command) */
   fetchClaudeUsage: (terminalId: string) => Promise<IPCResult>;
   /** Get the best available profile (for manual switching) */
-  getBestAvailableProfile: (excludeProfileId?: string) => Promise<IPCResult<ClaudeProfile | null>>;
+  getBestAvailableProfile: (excludeProfileId?: string) => Promise<IPCResult<IFlowProfile | null>>;
   /** Listen for SDK/CLI rate limit events (non-terminal) */
   onSDKRateLimit: (callback: (info: SDKRateLimitInfo) => void) => () => void;
   /** Retry a rate-limited operation with a different profile */

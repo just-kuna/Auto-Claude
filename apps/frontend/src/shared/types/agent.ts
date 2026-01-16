@@ -9,7 +9,7 @@
 /**
  * Usage data parsed from Claude Code's /usage command
  */
-export interface ClaudeUsageData {
+export interface IFlowUsageData {
   /** Session usage percentage (0-100) */
   sessionUsagePercent: number;
   /** When the session limit resets (ISO string or description like "11:59pm") */
@@ -28,7 +28,7 @@ export interface ClaudeUsageData {
  * Real-time usage snapshot for proactive monitoring
  * Returned from API or CLI usage check
  */
-export interface ClaudeUsageSnapshot {
+export interface IFlowUsageSnapshot {
   /** Session usage percentage (0-100) */
   sessionPercent: number;
   /** Weekly usage percentage (0-100) */
@@ -50,7 +50,7 @@ export interface ClaudeUsageSnapshot {
 /**
  * Rate limit event recorded for a profile
  */
-export interface ClaudeRateLimitEvent {
+export interface IFlowRateLimitEvent {
   /** Type of limit hit: 'session' or 'weekly' */
   type: 'session' | 'weekly';
   /** When the limit was hit */
@@ -65,7 +65,7 @@ export interface ClaudeRateLimitEvent {
  * A Claude Code subscription profile for multi-account support.
  * Profiles store OAuth tokens for instant switching without browser re-auth.
  */
-export interface ClaudeProfile {
+export interface IFlowProfile {
   id: string;
   name: string;
   /**
@@ -92,27 +92,27 @@ export interface ClaudeProfile {
   /** Last time this profile was used */
   lastUsedAt?: Date;
   /** Current usage data from /usage command */
-  usage?: ClaudeUsageData;
+  usage?: IFlowUsageData;
   /** Recent rate limit events for this profile */
-  rateLimitEvents?: ClaudeRateLimitEvent[];
+  rateLimitEvents?: IFlowRateLimitEvent[];
 }
 
 /**
  * Settings for Claude profile management
  */
-export interface ClaudeProfileSettings {
+export interface IFlowProfileSettings {
   /** All configured Claude profiles */
-  profiles: ClaudeProfile[];
+  profiles: IFlowProfile[];
   /** ID of the currently active profile */
   activeProfileId: string;
   /** Auto-switch settings */
-  autoSwitch?: ClaudeAutoSwitchSettings;
+  autoSwitch?: IFlowAutoSwitchSettings;
 }
 
 /**
  * Settings for automatic profile switching
  */
-export interface ClaudeAutoSwitchSettings {
+export interface IFlowAutoSwitchSettings {
   /** Master toggle - enables all auto-switch features */
   enabled: boolean;
 
