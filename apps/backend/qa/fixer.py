@@ -10,10 +10,18 @@ Memory Integration:
 """
 
 from pathlib import Path
+from typing import TYPE_CHECKING
+
+# Import client types for type hints
+if TYPE_CHECKING:
+    from core.iflow_client import IFlowClientWrapper
+    try:
+        from claude_agent_sdk import ClaudeSDKClient
+    except ImportError:
+        ClaudeSDKClient = None  # type: ignore
 
 # Memory integration for cross-session learning
 from agents.memory_manager import get_graphiti_context, save_session_memory
-from claude_agent_sdk import ClaudeSDKClient
 from debug import debug, debug_detailed, debug_error, debug_section, debug_success
 from security.tool_input_validator import get_safe_tool_input
 from task_logger import (
