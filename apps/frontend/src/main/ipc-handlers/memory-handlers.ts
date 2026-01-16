@@ -31,7 +31,7 @@ import {
 import { validateOpenAIApiKey } from '../api-validation-service';
 import { parsePythonCommand } from '../python-detector';
 import { getConfiguredPythonPath, pythonEnvManager } from '../python-env-manager';
-import { openTerminalWithCommand } from './claude-code-handlers';
+import { openTerminalWithCommand } from './iflow-handlers';
 
 /**
  * Ollama Service Status

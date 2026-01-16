@@ -8,7 +8,7 @@ import { execSync, execFileSync, spawn } from 'child_process';
 import { IPC_CHANNELS } from '../../../shared/constants';
 import type { IPCResult } from '../../../shared/types';
 import { getAugmentedEnv, findExecutable } from '../../env-utils';
-import { openTerminalWithCommand } from '../claude-code-handlers';
+import { openTerminalWithCommand } from '../iflow-handlers';
 import type { GitLabAuthStartResult } from './types';
 
 const DEFAULT_GITLAB_URL = 'https://gitlab.com';
