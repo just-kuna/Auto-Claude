@@ -1,32 +1,37 @@
 """
-Authentication helpers for Auto Claude.
+Authentication helpers for Auto-iFlow.
 
-Provides centralized authentication token resolution with fallback support
-for multiple environment variables, and SDK environment variable passthrough
-for custom API endpoints.
+Provides centralized authentication for iFlow CLI SDK with fallback support
+for multiple sources: environment variables, settings file, and legacy Claude tokens.
+
+iFlow uses API keys instead of OAuth tokens, making authentication simpler.
 """
 
 import json
 import os
 import platform
 import subprocess
+from pathlib import Path
 
-# Priority order for auth token resolution
-# NOTE: We intentionally do NOT fall back to ANTHROPIC_API_KEY.
-# Auto Claude is designed to use Claude Code OAuth tokens only.
-# This prevents silent billing to user's API credits when OAuth fails.
-AUTH_TOKEN_ENV_VARS = [
-    "CLAUDE_CODE_OAUTH_TOKEN",  # OAuth token from Claude Code CLI
-    "ANTHROPIC_AUTH_TOKEN",  # CCR/proxy token (for enterprise setups)
+# Priority order for auth token/key resolution
+# iFlow uses API keys, but we also support legacy Claude tokens for migration
+AUTH_KEY_ENV_VARS = [
+    "IFLOW_API_KEY",  # Primary: iFlow API key
+    # Legacy Claude support (for migration period)
+    "CLAUDE_CODE_OAUTH_TOKEN",
+    "ANTHROPIC_AUTH_TOKEN",
 ]
 
 # Environment variables to pass through to SDK subprocess
-# NOTE: ANTHROPIC_API_KEY is intentionally excluded to prevent silent API billing
 SDK_ENV_VARS = [
-    # API endpoint configuration
+    # iFlow configuration
+    "IFLOW_API_KEY",
+    "IFLOW_BASE_URL",
+    "IFLOW_MODEL",
+    # Legacy Anthropic configuration (for compatibility)
     "ANTHROPIC_BASE_URL",
     "ANTHROPIC_AUTH_TOKEN",
-    # Model overrides (from API Profile custom model mappings)
+    # Model overrides
     "ANTHROPIC_MODEL",
     "ANTHROPIC_DEFAULT_HAIKU_MODEL",
     "ANTHROPIC_DEFAULT_SONNET_MODEL",
@@ -36,14 +41,46 @@ SDK_ENV_VARS = [
     "DISABLE_TELEMETRY",
     "DISABLE_COST_WARNINGS",
     "API_TIMEOUT_MS",
-    # Windows-specific: Git Bash path for Claude Code CLI
-    "CLAUDE_CODE_GIT_BASH_PATH",
+    # Windows-specific: Git Bash path
+    "IFLOW_GIT_BASH_PATH",
+    "CLAUDE_CODE_GIT_BASH_PATH",  # Legacy
 ]
 
 
+# =============================================================================
+# iFlow Settings File
+# =============================================================================
+
+def get_iflow_settings_path() -> Path:
+    """Get the path to iFlow settings file."""
+    return Path.home() / ".iflow" / "settings.json"
+
+
+def get_api_key_from_iflow_settings() -> str | None:
+    """
+    Get API key from iFlow settings file (~/.iflow/settings.json).
+
+    Returns:
+        API key string if found, None otherwise
+    """
+    settings_path = get_iflow_settings_path()
+    if settings_path.exists():
+        try:
+            with open(settings_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                return data.get("apiKey")
+        except (json.JSONDecodeError, IOError):
+            pass
+    return None
+
+
+# =============================================================================
+# Legacy Claude Credential Support (for migration)
+# =============================================================================
+
 def get_token_from_keychain() -> str | None:
     """
-    Get authentication token from system credential store.
+    Get authentication token from system credential store (legacy Claude support).
 
     Reads Claude Code credentials from:
     - macOS: Keychain
@@ -60,12 +97,11 @@ def get_token_from_keychain() -> str | None:
     elif system == "Windows":
         return _get_token_from_windows_credential_files()
     else:
-        # Linux: secret-service not yet implemented
         return None
 
 
 def _get_token_from_macos_keychain() -> str | None:
-    """Get token from macOS Keychain."""
+    """Get token from macOS Keychain (legacy Claude support)."""
     try:
         result = subprocess.run(
             [
@@ -93,7 +129,6 @@ def _get_token_from_macos_keychain() -> str | None:
         if not token:
             return None
 
-        # Validate token format (Claude OAuth tokens start with sk-ant-oat01-)
         if not token.startswith("sk-ant-oat01-"):
             return None
 
@@ -104,12 +139,8 @@ def _get_token_from_macos_keychain() -> str | None:
 
 
 def _get_token_from_windows_credential_files() -> str | None:
-    """Get token from Windows credential files.
-
-    Claude Code on Windows stores credentials in ~/.claude/.credentials.json
-    """
+    """Get token from Windows credential files (legacy Claude support)."""
     try:
-        # Claude Code stores credentials in ~/.claude/.credentials.json
         cred_paths = [
             os.path.expandvars(r"%USERPROFILE%\.claude\.credentials.json"),
             os.path.expandvars(r"%USERPROFILE%\.claude\credentials.json"),
@@ -131,35 +162,66 @@ def _get_token_from_windows_credential_files() -> str | None:
         return None
 
 
-def get_auth_token() -> str | None:
+# =============================================================================
+# Main Authentication Functions
+# =============================================================================
+
+def get_iflow_api_key() -> str | None:
     """
-    Get authentication token from environment variables or system credential store.
+    Get iFlow API key from multiple sources.
 
-    Checks multiple sources in priority order:
-    1. CLAUDE_CODE_OAUTH_TOKEN (env var)
-    2. ANTHROPIC_AUTH_TOKEN (CCR/proxy env var for enterprise setups)
-    3. System credential store (macOS Keychain, Windows Credential Manager)
-
-    NOTE: ANTHROPIC_API_KEY is intentionally NOT supported to prevent
-    silent billing to user's API credits when OAuth is misconfigured.
+    Checks in priority order:
+    1. IFLOW_API_KEY environment variable
+    2. ~/.iflow/settings.json file
+    3. Legacy Claude tokens (for migration)
 
     Returns:
-        Token string if found, None otherwise
+        API key string if found, None otherwise
     """
-    # First check environment variables
-    for var in AUTH_TOKEN_ENV_VARS:
+    # 1. Check IFLOW_API_KEY environment variable
+    api_key = os.environ.get("IFLOW_API_KEY")
+    if api_key:
+        return api_key
+
+    # 2. Check iFlow settings file
+    api_key = get_api_key_from_iflow_settings()
+    if api_key:
+        return api_key
+
+    # 3. Legacy: Check Claude tokens (for migration period)
+    for var in AUTH_KEY_ENV_VARS[1:]:  # Skip IFLOW_API_KEY
         token = os.environ.get(var)
         if token:
             return token
 
-    # Fallback to system credential store
+    # 4. Legacy: Check system credential store
     return get_token_from_keychain()
 
 
+def get_auth_token() -> str | None:
+    """
+    Get authentication token/key (alias for get_iflow_api_key).
+
+    This function is kept for backward compatibility.
+
+    Returns:
+        API key/token string if found, None otherwise
+    """
+    return get_iflow_api_key()
+
+
 def get_auth_token_source() -> str | None:
-    """Get the name of the source that provided the auth token."""
-    # Check environment variables first
-    for var in AUTH_TOKEN_ENV_VARS:
+    """Get the name of the source that provided the auth token/key."""
+    # Check IFLOW_API_KEY first
+    if os.environ.get("IFLOW_API_KEY"):
+        return "IFLOW_API_KEY"
+
+    # Check iFlow settings file
+    if get_api_key_from_iflow_settings():
+        return "~/.iflow/settings.json"
+
+    # Check legacy environment variables
+    for var in AUTH_KEY_ENV_VARS[1:]:
         if os.environ.get(var):
             return var
 
@@ -167,54 +229,52 @@ def get_auth_token_source() -> str | None:
     if get_token_from_keychain():
         system = platform.system()
         if system == "Darwin":
-            return "macOS Keychain"
+            return "macOS Keychain (legacy)"
         elif system == "Windows":
-            return "Windows Credential Files"
+            return "Windows Credential Files (legacy)"
         else:
-            return "System Credential Store"
+            return "System Credential Store (legacy)"
 
     return None
 
 
 def require_auth_token() -> str:
     """
-    Get authentication token or raise ValueError.
+    Get authentication token/key or raise ValueError.
 
     Raises:
-        ValueError: If no auth token is found in any supported source
+        ValueError: If no API key is found in any supported source
     """
-    token = get_auth_token()
-    if not token:
+    api_key = get_iflow_api_key()
+    if not api_key:
         error_msg = (
-            "No OAuth token found.\n\n"
-            "Auto Claude requires Claude Code OAuth authentication.\n"
-            "Direct API keys (ANTHROPIC_API_KEY) are not supported.\n\n"
+            "No iFlow API key found.\n\n"
+            "Auto-iFlow requires an iFlow API key for authentication.\n"
+            "iFlow is FREE - get your API key at https://iflow.cn\n\n"
         )
-        # Provide platform-specific guidance
         system = platform.system()
-        if system == "Darwin":
-            error_msg += (
-                "To authenticate:\n"
-                "  1. Run: claude setup-token\n"
-                "  2. The token will be saved to macOS Keychain automatically\n\n"
-                "Or set CLAUDE_CODE_OAUTH_TOKEN in your .env file."
-            )
-        elif system == "Windows":
-            error_msg += (
-                "To authenticate:\n"
-                "  1. Run: claude setup-token\n"
-                "  2. The token should be saved to Windows Credential Manager\n\n"
-                "If auto-detection fails, set CLAUDE_CODE_OAUTH_TOKEN in your .env file.\n"
-                "Check: %LOCALAPPDATA%\\Claude\\credentials.json"
-            )
-        else:
-            error_msg += (
-                "To authenticate:\n"
-                "  1. Run: claude setup-token\n"
-                "  2. Set CLAUDE_CODE_OAUTH_TOKEN in your .env file"
-            )
+        error_msg += (
+            "To authenticate:\n"
+            "  Option 1: Run 'iflow' and follow the login prompts\n"
+            "  Option 2: Set IFLOW_API_KEY in your .env file\n"
+            "  Option 3: Add apiKey to ~/.iflow/settings.json\n\n"
+            "Get your free API key:\n"
+            "  1. Register at https://iflow.cn\n"
+            "  2. Go to profile settings\n"
+            "  3. Click 'Reset' to generate a new API key"
+        )
         raise ValueError(error_msg)
-    return token
+    return api_key
+
+
+def require_iflow_api_key() -> str:
+    """
+    Get iFlow API key or raise ValueError (alias for require_auth_token).
+
+    Raises:
+        ValueError: If no API key is found
+    """
+    return require_auth_token()
 
 
 def _find_git_bash_path() -> str | None:
@@ -222,8 +282,6 @@ def _find_git_bash_path() -> str | None:
     Find git-bash (bash.exe) path on Windows.
 
     Uses 'where git' to find git.exe, then derives bash.exe location from it.
-    Git for Windows installs bash.exe in the 'bin' directory alongside git.exe
-    or in the parent 'bin' directory when git.exe is in 'cmd'.
 
     Returns:
         Full path to bash.exe if found, None otherwise
@@ -231,16 +289,16 @@ def _find_git_bash_path() -> str | None:
     if platform.system() != "Windows":
         return None
 
-    # If already set in environment, use that
-    existing = os.environ.get("CLAUDE_CODE_GIT_BASH_PATH")
-    if existing and os.path.exists(existing):
-        return existing
+    # Check both iFlow and legacy Claude env vars
+    for env_var in ["IFLOW_GIT_BASH_PATH", "CLAUDE_CODE_GIT_BASH_PATH"]:
+        existing = os.environ.get(env_var)
+        if existing and os.path.exists(existing):
+            return existing
 
     git_path = None
 
     # Method 1: Use 'where' command to find git.exe
     try:
-        # Use where.exe explicitly for reliability
         result = subprocess.run(
             ["where.exe", "git"],
             capture_output=True,
@@ -254,10 +312,9 @@ def _find_git_bash_path() -> str | None:
             if git_paths:
                 git_path = git_paths[0].strip()
     except (subprocess.TimeoutExpired, FileNotFoundError, subprocess.SubprocessError):
-        # Intentionally suppress errors - best-effort detection with fallback to common paths
         pass
 
-    # Method 2: Check common installation paths if 'where' didn't work
+    # Method 2: Check common installation paths
     if not git_path:
         common_git_paths = [
             os.path.expandvars(r"%PROGRAMFILES%\Git\cmd\git.exe"),
@@ -274,19 +331,14 @@ def _find_git_bash_path() -> str | None:
         return None
 
     # Derive bash.exe location from git.exe location
-    # Git for Windows structure:
-    #   C:\...\Git\cmd\git.exe     -> bash.exe is at C:\...\Git\bin\bash.exe
-    #   C:\...\Git\bin\git.exe     -> bash.exe is at C:\...\Git\bin\bash.exe
-    #   C:\...\Git\mingw64\bin\git.exe -> bash.exe is at C:\...\Git\bin\bash.exe
     git_dir = os.path.dirname(git_path)
     git_parent = os.path.dirname(git_dir)
     git_grandparent = os.path.dirname(git_parent)
 
-    # Check common bash.exe locations relative to git installation
     possible_bash_paths = [
-        os.path.join(git_parent, "bin", "bash.exe"),  # cmd -> bin
-        os.path.join(git_dir, "bash.exe"),  # If git.exe is in bin
-        os.path.join(git_grandparent, "bin", "bash.exe"),  # mingw64/bin -> bin
+        os.path.join(git_parent, "bin", "bash.exe"),
+        os.path.join(git_dir, "bash.exe"),
+        os.path.join(git_grandparent, "bin", "bash.exe"),
     ]
 
     for bash_path in possible_bash_paths:
@@ -300,10 +352,10 @@ def get_sdk_env_vars() -> dict[str, str]:
     """
     Get environment variables to pass to SDK.
 
-    Collects relevant env vars (ANTHROPIC_BASE_URL, etc.) that should
-    be passed through to the claude-agent-sdk subprocess.
+    Collects relevant env vars that should be passed through to the
+    iflow-cli-sdk subprocess.
 
-    On Windows, auto-detects CLAUDE_CODE_GIT_BASH_PATH if not already set.
+    On Windows, auto-detects git-bash path if not already set.
 
     Returns:
         Dict of env var name -> value for non-empty vars
@@ -315,25 +367,35 @@ def get_sdk_env_vars() -> dict[str, str]:
             env[var] = value
 
     # On Windows, auto-detect git-bash path if not already set
-    # Claude Code CLI requires bash.exe to run on Windows
-    if platform.system() == "Windows" and "CLAUDE_CODE_GIT_BASH_PATH" not in env:
-        bash_path = _find_git_bash_path()
-        if bash_path:
-            env["CLAUDE_CODE_GIT_BASH_PATH"] = bash_path
+    if platform.system() == "Windows":
+        if "IFLOW_GIT_BASH_PATH" not in env and "CLAUDE_CODE_GIT_BASH_PATH" not in env:
+            bash_path = _find_git_bash_path()
+            if bash_path:
+                env["IFLOW_GIT_BASH_PATH"] = bash_path
 
     return env
 
 
-def ensure_claude_code_oauth_token() -> None:
+def ensure_iflow_api_key() -> None:
     """
-    Ensure CLAUDE_CODE_OAUTH_TOKEN is set (for SDK compatibility).
+    Ensure IFLOW_API_KEY is set in environment.
 
-    If not set but other auth tokens are available, copies the value
-    to CLAUDE_CODE_OAUTH_TOKEN so the underlying SDK can use it.
+    If not set but API key is available from other sources,
+    copies the value to IFLOW_API_KEY for SDK compatibility.
     """
-    if os.environ.get("CLAUDE_CODE_OAUTH_TOKEN"):
+    if os.environ.get("IFLOW_API_KEY"):
         return
 
-    token = get_auth_token()
-    if token:
-        os.environ["CLAUDE_CODE_OAUTH_TOKEN"] = token
+    api_key = get_iflow_api_key()
+    if api_key:
+        os.environ["IFLOW_API_KEY"] = api_key
+
+
+# Legacy alias for backward compatibility
+def ensure_claude_code_oauth_token() -> None:
+    """
+    Legacy function - now calls ensure_iflow_api_key().
+
+    Kept for backward compatibility during migration.
+    """
+    ensure_iflow_api_key()
