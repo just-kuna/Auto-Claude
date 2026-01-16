@@ -9,7 +9,16 @@ memory updates, recovery tracking, and Linear integration.
 import logging
 from pathlib import Path
 
-from claude_agent_sdk import ClaudeSDKClient
+from typing import TYPE_CHECKING
+
+# Import client types for type hints
+if TYPE_CHECKING:
+    from core.iflow_client import IFlowClientWrapper
+    try:
+        from claude_agent_sdk import ClaudeSDKClient
+    except ImportError:
+        ClaudeSDKClient = None  # type: ignore
+
 from debug import debug, debug_detailed, debug_error, debug_section, debug_success
 from insight_extractor import extract_session_insights
 from linear_updater import (
