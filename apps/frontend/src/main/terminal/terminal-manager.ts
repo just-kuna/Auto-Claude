@@ -16,7 +16,7 @@ import * as PtyManager from './pty-manager';
 import * as SessionHandler from './session-handler';
 import * as TerminalLifecycle from './terminal-lifecycle';
 import * as TerminalEventHandler from './terminal-event-handler';
-import * as ClaudeIntegration from './claude-integration-handler';
+import * as ClaudeIntegration from './iflow-integration-handler';
 import { debugLog, debugError } from '../../shared/utils/debug-logger';
 
 export class TerminalManager {
