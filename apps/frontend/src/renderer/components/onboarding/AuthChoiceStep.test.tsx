@@ -295,7 +295,7 @@ describe('AuthChoiceStep', () => {
         />
       );
 
-      expect(screen.getByText(/Both options provide full access to Claude Code features/)).toBeInTheDocument();
+      expect(screen.getByText(/Both options provide full access to iFlow Code features/)).toBeInTheDocument();
     });
   });
 

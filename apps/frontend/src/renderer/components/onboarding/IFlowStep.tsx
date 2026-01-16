@@ -14,9 +14,9 @@ interface IFlowStepProps {
 type DetectionStatus = 'loading' | 'installed' | 'outdated' | 'not-found' | 'error';
 
 /**
- * Claude Code CLI installation step for the onboarding wizard.
+ * iFlow Code CLI installation step for the onboarding wizard.
  *
- * Checks if Claude Code CLI is installed, shows version information,
+ * Checks if iFlow Code CLI is installed, shows version information,
  * and provides one-click installation/update functionality.
  */
 export function IFlowStep({ onNext, onBack, onSkip }: IFlowStepProps) {
@@ -27,7 +27,7 @@ export function IFlowStep({ onNext, onBack, onSkip }: IFlowStepProps) {
   const [error, setError] = useState<string | null>(null);
   const [installSuccess, setInstallSuccess] = useState(false);
 
-  // Check Claude Code version on mount
+  // Check iFlow Code version on mount
   const checkVersion = useCallback(async () => {
     setStatus('loading');
     setError(null);
@@ -58,7 +58,7 @@ export function IFlowStep({ onNext, onBack, onSkip }: IFlowStepProps) {
         setError(result.error || 'Failed to check version');
       }
     } catch (err) {
-      console.error('Failed to check Claude Code version:', err);
+      console.error('Failed to check iFlow Code version:', err);
       setStatus('error');
       setError(err instanceof Error ? err.message : 'Unknown error');
     }
@@ -117,7 +117,7 @@ export function IFlowStep({ onNext, onBack, onSkip }: IFlowStepProps) {
   const getStatusText = () => {
     switch (status) {
       case 'loading':
-        return t('claudeCode.detecting', 'Checking Claude Code installation...');
+        return t('claudeCode.detecting', 'Checking iFlow Code installation...');
       case 'installed':
         return t('claudeCode.status.installed', 'Installed');
       case 'outdated':
@@ -155,10 +155,10 @@ export function IFlowStep({ onNext, onBack, onSkip }: IFlowStepProps) {
             </div>
           </div>
           <h1 className="text-2xl font-bold text-foreground tracking-tight">
-            {t('claudeCode.title', 'Claude Code CLI')}
+            {t('claudeCode.title', 'iFlow Code CLI')}
           </h1>
           <p className="mt-2 text-muted-foreground">
-            {t('claudeCode.description', 'Install or update the Claude Code CLI to enable AI-powered features')}
+            {t('claudeCode.description', 'Install or update the iFlow Code CLI to enable AI-powered features')}
           </p>
         </div>
 
@@ -171,10 +171,10 @@ export function IFlowStep({ onNext, onBack, onSkip }: IFlowStepProps) {
                 <Info className="h-5 w-5 text-info shrink-0 mt-0.5" />
                 <div className="flex-1 space-y-3">
                   <p className="text-sm font-medium text-foreground">
-                    {t('claudeCode.info.title', 'What is Claude Code?')}
+                    {t('claudeCode.info.title', 'What is iFlow Code?')}
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    {t('claudeCode.info.description', "Claude Code is Anthropic's official CLI that powers Auto Claude's AI features. It provides secure authentication and direct access to Claude models.")}
+                    {t('claudeCode.info.description', "iFlow Code is Anthropic's official CLI that powers Auto Claude's AI features. It provides secure authentication and direct access to Claude models.")}
                   </p>
                 </div>
               </div>
@@ -267,8 +267,8 @@ export function IFlowStep({ onNext, onBack, onSkip }: IFlowStepProps) {
                   <>
                     <Download className="h-4 w-4" />
                     {status === 'outdated'
-                      ? t('claudeCode.install.updating', 'Update Claude Code')
-                      : t('claudeCode.install.button', 'Install Claude Code')
+                      ? t('claudeCode.install.updating', 'Update iFlow Code')
+                      : t('claudeCode.install.button', 'Install iFlow Code')
                     }
                   </>
                 )}
@@ -284,7 +284,7 @@ export function IFlowStep({ onNext, onBack, onSkip }: IFlowStepProps) {
               className="text-muted-foreground gap-1"
               onClick={() => window.electronAPI?.openExternal?.('https://claude.ai/code')}
             >
-              {t('claudeCode.learnMore', 'Learn more about Claude Code')}
+              {t('claudeCode.learnMore', 'Learn more about iFlow Code')}
               <ExternalLink className="h-3 w-3" />
             </Button>
           </div>

@@ -47,7 +47,7 @@ export function EnvConfigModal({
   onOpenChange,
   onConfigured,
   title = 'Claude Authentication Required',
-  description = 'A Claude Code OAuth token is required to use AI features like Ideation and Roadmap generation.',
+  description = 'A iFlow Code OAuth token is required to use AI features like Ideation and Roadmap generation.',
   projectId
 }: EnvConfigModalProps) {
   const [token, setToken] = useState('');
@@ -248,7 +248,7 @@ export function EnvConfigModal({
   };
 
   const handleOpenDocs = () => {
-    // Open the Claude Code documentation for getting a token
+    // Open the iFlow Code documentation for getting a token
     window.open('https://docs.anthropic.com/en/docs/claude-code', '_blank');
   };
 
@@ -484,7 +484,7 @@ export function EnvConfigModal({
                   <div className="text-xs text-muted-foreground space-y-1">
                     <p className="font-medium text-foreground">Steps:</p>
                     <ol className="list-decimal list-inside space-y-1">
-                      <li>Install Claude Code CLI if you haven't already</li>
+                      <li>Install iFlow Code CLI if you haven't already</li>
                       <li>
                         Run{' '}
                         <code className="px-1 py-0.5 bg-muted rounded font-mono">
@@ -512,7 +512,7 @@ export function EnvConfigModal({
                   {/* Token input */}
                   <div className="space-y-2">
                     <Label htmlFor="token" className="text-sm font-medium text-foreground">
-                      Claude Code OAuth Token
+                      iFlow Code OAuth Token
                     </Label>
                     <div className="relative">
                       <Input

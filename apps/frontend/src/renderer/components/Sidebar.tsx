@@ -330,7 +330,7 @@ export function Sidebar({
 
         {/* Bottom section with Settings, Help, and New Task */}
         <div className="p-4 space-y-3">
-          {/* Claude Code Status Badge */}
+          {/* iFlow Code Status Badge */}
           <IFlowStatusBadge />
 
           {/* Settings and Help row */}

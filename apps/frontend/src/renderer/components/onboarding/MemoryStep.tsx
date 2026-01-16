@@ -58,7 +58,7 @@ interface MemoryConfig {
  * - Embedding Provider selection (Ollama default)
  * - Provider-specific configuration
  *
- * Note: LLM provider is not configurable - Claude SDK is used throughout.
+ * Note: LLM provider is not configurable - iFlow SDK is used throughout.
  */
 export function MemoryStep({ onNext, onBack }: MemoryStepProps) {
   const { t } = useTranslation('onboarding');

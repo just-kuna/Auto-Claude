@@ -188,7 +188,7 @@ export function AppUpdateNotification() {
             </div>
           )}
 
-          {/* Claude Code Changelog Link */}
+          {/* iFlow Code Changelog Link */}
           <Button
             variant="link"
             size="sm"
@@ -196,10 +196,10 @@ export function AppUpdateNotification() {
             onClick={() => window.electronAPI?.openExternal?.(CLAUDE_CODE_CHANGELOG_URL)}
             aria-label={t(
               "dialogs:appUpdate.claudeCodeChangelogAriaLabel",
-              "View Claude Code Changelog (opens in new window)"
+              "View iFlow Code Changelog (opens in new window)"
             )}
           >
-            {t("dialogs:appUpdate.claudeCodeChangelog", "View Claude Code Changelog")}
+            {t("dialogs:appUpdate.claudeCodeChangelog", "View iFlow Code Changelog")}
             <ExternalLink className="h-3 w-3" aria-hidden="true" />
           </Button>
 

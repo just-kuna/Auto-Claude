@@ -120,7 +120,7 @@ export function Ideation({ projectId, onGoToTask }: IdeationProps) {
           onOpenChange={setShowEnvConfigModal}
           onConfigured={handleEnvConfigured}
           title="Claude Authentication Required"
-          description="A Claude Code OAuth token is required to generate AI-powered feature ideas."
+          description="A iFlow Code OAuth token is required to generate AI-powered feature ideas."
           projectId={projectId}
         />
       </>
@@ -243,7 +243,7 @@ export function Ideation({ projectId, onGoToTask }: IdeationProps) {
         onOpenChange={setShowEnvConfigModal}
         onConfigured={handleEnvConfigured}
         title="Claude Authentication Required"
-        description="A Claude Code OAuth token is required to generate AI-powered feature ideas."
+        description="A iFlow Code OAuth token is required to generate AI-powered feature ideas."
         projectId={projectId}
       />
     </div>

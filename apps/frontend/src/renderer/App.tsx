@@ -699,7 +699,7 @@ export function App() {
 
     try {
       // NOTE: settings.githubToken is a GitHub access token (from gh CLI),
-      // NOT a Claude Code OAuth token. They are different things:
+      // NOT a iFlow Code OAuth token. They are different things:
       // - GitHub token: for GitHub API access (repo operations)
       // - Claude token: for Claude AI access (run.py, roadmap, etc.)
       // The user needs to separately authenticate with Claude using 'claude setup-token'
@@ -1059,7 +1059,7 @@ export function App() {
           </DialogContent>
         </Dialog>
 
-        {/* Rate Limit Modal - shows when Claude Code hits usage limits (terminal) */}
+        {/* Rate Limit Modal - shows when iFlow Code hits usage limits (terminal) */}
         <RateLimitModal />
 
         {/* SDK Rate Limit Modal - shows when SDK/CLI operations hit limits (changelog, tasks, etc.) */}

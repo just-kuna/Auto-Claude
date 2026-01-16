@@ -142,7 +142,7 @@ export function AuthChoiceStep({ onNext, onBack, onSkip, onAPIKeyPathComplete }:
           {/* Info text */}
           <div className="text-center mb-8">
             <p className="text-muted-foreground text-sm">
-              Both options provide full access to Claude Code features. Choose based on your preference.
+              Both options provide full access to iFlow Code features. Choose based on your preference.
             </p>
           </div>
 

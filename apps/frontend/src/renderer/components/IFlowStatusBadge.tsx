@@ -46,7 +46,7 @@ const CHECK_INTERVAL_MS = 24 * 60 * 60 * 1000;
 const VERSION_RECHECK_DELAY_MS = 5000;
 
 /**
- * Claude Code CLI status badge for the sidebar.
+ * iFlow Code CLI status badge for the sidebar.
  * Shows installation status and provides quick access to install/update.
  */
 export function IFlowStatusBadge({ className }: IFlowStatusBadgeProps) {
@@ -73,7 +73,7 @@ export function IFlowStatusBadge({ className }: IFlowStatusBadgeProps) {
   const [selectedInstallation, setSelectedInstallation] = useState<string | null>(null);
   const [showPathChangeWarning, setShowPathChangeWarning] = useState(false);
 
-  // Check Claude Code version
+  // Check iFlow Code version
   const checkVersion = useCallback(async () => {
     try {
       if (!window.electronAPI?.checkClaudeCodeVersion) {
@@ -98,7 +98,7 @@ export function IFlowStatusBadge({ className }: IFlowStatusBadgeProps) {
         setStatus("error");
       }
     } catch (err) {
-      console.error("Failed to check Claude Code version:", err);
+      console.error("Failed to check iFlow Code version:", err);
       setStatus("error");
     }
   }, []);
@@ -199,7 +199,7 @@ export function IFlowStatusBadge({ className }: IFlowStatusBadgeProps) {
         setInstallError(result.error || "Installation failed");
       }
     } catch (err) {
-      console.error("Failed to install Claude Code:", err);
+      console.error("Failed to install iFlow Code:", err);
       setInstallError(err instanceof Error ? err.message : "Installation failed");
     } finally {
       setIsInstalling(false);
@@ -231,7 +231,7 @@ export function IFlowStatusBadge({ className }: IFlowStatusBadgeProps) {
         setInstallError(result.error || "Failed to switch version");
       }
     } catch (err) {
-      console.error("Failed to switch Claude Code version:", err);
+      console.error("Failed to switch iFlow Code version:", err);
       setInstallError(err instanceof Error ? err.message : "Failed to switch version");
     } finally {
       setIsInstalling(false);
@@ -265,7 +265,7 @@ export function IFlowStatusBadge({ className }: IFlowStatusBadgeProps) {
         setInstallError(result.error || "Failed to switch CLI path");
       }
     } catch (err) {
-      console.error("Failed to switch Claude CLI path:", err);
+      console.error("Failed to switch iFlow CLI path:", err);
       setInstallError(err instanceof Error ? err.message : "Failed to switch CLI path");
     } finally {
       setIsInstalling(false);
@@ -347,15 +347,15 @@ export function IFlowStatusBadge({ className }: IFlowStatusBadgeProps) {
   const getTooltipText = () => {
     switch (status) {
       case "loading":
-        return t("navigation:claudeCode.checking", "Checking Claude Code...");
+        return t("navigation:claudeCode.checking", "Checking iFlow Code...");
       case "installed":
-        return t("navigation:claudeCode.upToDate", "Claude Code is up to date");
+        return t("navigation:claudeCode.upToDate", "iFlow Code is up to date");
       case "outdated":
-        return t("navigation:claudeCode.updateAvailable", "Claude Code update available");
+        return t("navigation:claudeCode.updateAvailable", "iFlow Code update available");
       case "not-found":
-        return t("navigation:claudeCode.notInstalled", "Claude Code not installed");
+        return t("navigation:claudeCode.notInstalled", "iFlow Code not installed");
       case "error":
-        return t("navigation:claudeCode.error", "Error checking Claude Code");
+        return t("navigation:claudeCode.error", "Error checking iFlow Code");
     }
   };
 
@@ -383,7 +383,7 @@ export function IFlowStatusBadge({ className }: IFlowStatusBadgeProps) {
                   )}
                 />
               </div>
-              <span className="truncate">Claude Code</span>
+              <span className="truncate">iFlow Code</span>
               {status === "outdated" && (
                 <span className="ml-auto text-[10px] bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 px-1.5 py-0.5 rounded">
                   {t("common:update", "Update")}
@@ -408,7 +408,7 @@ export function IFlowStatusBadge({ className }: IFlowStatusBadgeProps) {
               <Terminal className="h-4 w-4 text-primary" />
             </div>
             <div>
-              <h4 className="text-sm font-medium">Claude Code CLI</h4>
+              <h4 className="text-sm font-medium">iFlow Code CLI</h4>
               <p className="text-xs text-muted-foreground flex items-center gap-1">
                 {getStatusIcon()}
                 {status === "installed" && t("navigation:claudeCode.installed", "Installed")}
@@ -602,10 +602,10 @@ export function IFlowStatusBadge({ className }: IFlowStatusBadgeProps) {
             onClick={() => window.electronAPI?.openExternal?.("https://claude.ai/code")}
             aria-label={t(
               "navigation:claudeCode.learnMoreAriaLabel",
-              "Learn more about Claude Code (opens in new window)"
+              "Learn more about iFlow Code (opens in new window)"
             )}
           >
-            {t("navigation:claudeCode.learnMore", "Learn more about Claude Code")}
+            {t("navigation:claudeCode.learnMore", "Learn more about iFlow Code")}
             <ExternalLink className="h-3 w-3" aria-hidden="true" />
           </Button>
 
@@ -621,10 +621,10 @@ export function IFlowStatusBadge({ className }: IFlowStatusBadgeProps) {
             }
             aria-label={t(
               "navigation:claudeCode.viewChangelogAriaLabel",
-              "View Claude Code Changelog (opens in new window)"
+              "View iFlow Code Changelog (opens in new window)"
             )}
           >
-            {t("navigation:claudeCode.viewChangelog", "View Claude Code Changelog")}
+            {t("navigation:claudeCode.viewChangelog", "View iFlow Code Changelog")}
             <ExternalLink className="h-3 w-3" aria-hidden="true" />
           </Button>
         </div>
@@ -635,12 +635,12 @@ export function IFlowStatusBadge({ className }: IFlowStatusBadgeProps) {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {t("navigation:claudeCode.updateWarningTitle", "Update Claude Code?")}
+              {t("navigation:claudeCode.updateWarningTitle", "Update iFlow Code?")}
             </AlertDialogTitle>
             <AlertDialogDescription>
               {t(
                 "navigation:claudeCode.updateWarningDescription",
-                "Updating will close all running Claude Code sessions. Any unsaved work in those sessions may be lost. Make sure to save your work before proceeding."
+                "Updating will close all running iFlow Code sessions. Any unsaved work in those sessions may be lost. Make sure to save your work before proceeding."
               )}
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -665,7 +665,7 @@ export function IFlowStatusBadge({ className }: IFlowStatusBadgeProps) {
             <AlertDialogDescription>
               {t(
                 "navigation:claudeCode.rollbackWarningDescription",
-                "Switching versions will close all running Claude Code sessions. Any unsaved work in those sessions may be lost. Make sure to save your work before proceeding."
+                "Switching versions will close all running iFlow Code sessions. Any unsaved work in those sessions may be lost. Make sure to save your work before proceeding."
               )}
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -690,7 +690,7 @@ export function IFlowStatusBadge({ className }: IFlowStatusBadgeProps) {
             <AlertDialogDescription>
               {t(
                 "navigation:claudeCode.pathChangeWarningDescription",
-                "Switching CLI installations will use a different Claude Code binary. Any running sessions will continue using the previous installation until restarted."
+                "Switching CLI installations will use a different iFlow Code binary. Any running sessions will continue using the previous installation until restarted."
               )}
               <span className="block mt-2 font-mono text-xs break-all">
                 {selectedInstallation}
