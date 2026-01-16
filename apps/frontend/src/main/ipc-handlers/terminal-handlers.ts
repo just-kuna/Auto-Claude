@@ -378,7 +378,7 @@ export function registerTerminalHandlers(
         // Use full path to claude CLI - no need to modify PATH since we have the absolute path
         debugLog('[IPC:CLAUDE_PROFILE_INITIALIZE] Getting Claude CLI invocation...');
         let loginCommand: string;
-        const { command: claudeCmd } = await getClaudeCliInvocationAsync();
+        const { command: iflowCmd } = await getIFlowCliInvocationAsync();
         debugLog('[IPC:CLAUDE_PROFILE_INITIALIZE] Got Claude CLI:', claudeCmd);
 
         // Use the full path directly - escaping only needed for paths with spaces

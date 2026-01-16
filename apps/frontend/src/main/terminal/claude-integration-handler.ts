@@ -418,7 +418,7 @@ export function invokeClaude(
   });
 
   const cwdCommand = buildCdCommand(cwd);
-  const { command: claudeCmd, env: claudeEnv } = getClaudeCliInvocation();
+  const { command: iflowCmd, env: iflowEnv } = getIFlowCliInvocation();
   const escapedClaudeCmd = escapeShellArg(claudeCmd);
   const pathPrefix = claudeEnv.PATH
     ? `PATH=${escapeShellArg(normalizePathForBash(claudeEnv.PATH))} `
@@ -505,7 +505,7 @@ export function resumeClaude(
   terminal.isClaudeMode = true;
   SessionHandler.releaseSessionId(terminal.id);
 
-  const { command: claudeCmd, env: claudeEnv } = getClaudeCliInvocation();
+  const { command: iflowCmd, env: iflowEnv } = getIFlowCliInvocation();
   const escapedClaudeCmd = escapeShellArg(claudeCmd);
   const pathPrefix = claudeEnv.PATH
     ? `PATH=${escapeShellArg(normalizePathForBash(claudeEnv.PATH))} `
@@ -596,7 +596,7 @@ export async function invokeClaudeAsync(
 
   // Async CLI invocation - non-blocking
   const cwdCommand = buildCdCommand(cwd);
-  const { command: claudeCmd, env: claudeEnv } = await getClaudeCliInvocationAsync();
+  const { command: iflowCmd, env: iflowEnv } = await getIFlowCliInvocationAsync();
   const escapedClaudeCmd = escapeShellArg(claudeCmd);
   const pathPrefix = claudeEnv.PATH
     ? `PATH=${escapeShellArg(normalizePathForBash(claudeEnv.PATH))} `
@@ -679,7 +679,7 @@ export async function resumeClaudeAsync(
   SessionHandler.releaseSessionId(terminal.id);
 
   // Async CLI invocation - non-blocking
-  const { command: claudeCmd, env: claudeEnv } = await getClaudeCliInvocationAsync();
+  const { command: iflowCmd, env: iflowEnv } = await getIFlowCliInvocationAsync();
   const escapedClaudeCmd = escapeShellArg(claudeCmd);
   const pathPrefix = claudeEnv.PATH
     ? `PATH=${escapeShellArg(normalizePathForBash(claudeEnv.PATH))} `

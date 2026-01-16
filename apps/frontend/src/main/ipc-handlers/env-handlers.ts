@@ -34,7 +34,7 @@ type ResolvedClaudeCliInvocation =
 
 function resolveClaudeCliInvocation(): ResolvedClaudeCliInvocation {
   try {
-    const invocation = getClaudeCliInvocation();
+    const invocation = getIFlowCliInvocation();
     if (!invocation?.command) {
       throw new Error('Claude CLI path not resolved');
     }
@@ -52,7 +52,7 @@ function resolveClaudeCliInvocation(): ResolvedClaudeCliInvocation {
  */
 async function resolveClaudeCliInvocationAsync(): Promise<ResolvedClaudeCliInvocation> {
   try {
-    const invocation = await getClaudeCliInvocationAsync();
+    const invocation = await getIFlowCliInvocationAsync();
     if (!invocation?.command) {
       throw new Error('Claude CLI path not resolved');
     }
