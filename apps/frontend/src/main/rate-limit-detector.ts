@@ -3,7 +3,7 @@
  * Detects rate limit errors in stdout/stderr output and provides context.
  */
 
-import { getClaudeProfileManager } from './claude-profile-manager';
+import { getClaudeProfileManager } from './iflow-profile-manager';
 
 /**
  * Regex pattern to detect Claude Code rate limit messages

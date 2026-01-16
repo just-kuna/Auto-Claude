@@ -49,7 +49,7 @@ vi.mock('../../claude-cli-utils', () => ({
   getClaudeCliInvocation: mockGetClaudeCliInvocation,
 }));
 
-vi.mock('../../claude-profile-manager', () => ({
+vi.mock('../../iflow-profile-manager', () => ({
   getClaudeProfileManager: mockGetClaudeProfileManager,
 }));
 

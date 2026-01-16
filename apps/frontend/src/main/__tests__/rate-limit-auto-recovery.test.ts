@@ -80,7 +80,7 @@ describe('Rate Limit Auto-Recovery Integration', () => {
 
   describe('Rate Limit Detection Patterns', () => {
     beforeEach(() => {
-      vi.doMock('../claude-profile-manager', () => ({
+      vi.doMock('../iflow-profile-manager', () => ({
         getClaudeProfileManager: vi.fn(() => mockProfileManager)
       }));
     });
@@ -149,7 +149,7 @@ Stack trace follows`;
         autoSwitchSettings: { ...mockAutoSwitchSettings, enabled: false }
       });
 
-      vi.doMock('../claude-profile-manager', () => ({
+      vi.doMock('../iflow-profile-manager', () => ({
         getClaudeProfileManager: vi.fn(() => disabledManager)
       }));
 
@@ -456,7 +456,7 @@ describe('Rate Limit Edge Cases', () => {
     const mockManager = createMockProfileManager();
 
     beforeEach(() => {
-      vi.doMock('../claude-profile-manager', () => ({
+      vi.doMock('../iflow-profile-manager', () => ({
         getClaudeProfileManager: vi.fn(() => mockManager)
       }));
     });

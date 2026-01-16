@@ -67,8 +67,8 @@ vi.mock('../project-store', () => ({
   }
 }));
 
-// Mock claude-profile-manager
-vi.mock('../claude-profile-manager', () => ({
+// Mock iflow-profile-manager
+vi.mock('../iflow-profile-manager', () => ({
   getClaudeProfileManager: vi.fn(() => ({
     getProfilePath: vi.fn(() => '/fake/profile/path'),
     ensureProfileDir: vi.fn(),

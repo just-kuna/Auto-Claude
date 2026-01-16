@@ -5,7 +5,7 @@ import { AgentState } from './agent-state';
 import { AgentEvents } from './agent-events';
 import { AgentProcessManager } from './agent-process';
 import { AgentQueueManager } from './agent-queue';
-import { getClaudeProfileManager, initializeClaudeProfileManager } from '../claude-profile-manager';
+import { getClaudeProfileManager, initializeClaudeProfileManager } from '../iflow-profile-manager';
 import {
   SpecCreationMetadata,
   TaskExecutionOptions,

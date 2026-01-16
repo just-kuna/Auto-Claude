@@ -9,7 +9,7 @@ import { AgentManager } from '../../agent';
 import { fileWatcher } from '../../file-watcher';
 import { findTaskAndProject } from './shared';
 import { checkGitStatus } from '../../project-initializer';
-import { initializeClaudeProfileManager, type ClaudeProfileManager } from '../../claude-profile-manager';
+import { initializeClaudeProfileManager, type ClaudeProfileManager } from '../../iflow-profile-manager';
 import {
   getPlanPath,
   persistPlanStatus,

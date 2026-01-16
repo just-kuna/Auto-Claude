@@ -38,13 +38,13 @@ vi.mock('child_process', async (importOriginal) => {
   };
 });
 
-// Mock claude-profile-manager to bypass auth checks in tests
+// Mock iflow-profile-manager to bypass auth checks in tests
 const mockProfileManager = {
   hasValidAuth: () => true,
   getActiveProfile: () => ({ profileId: 'default', profileName: 'Default' })
 };
 
-vi.mock('../../main/claude-profile-manager', () => ({
+vi.mock('../../main/iflow-profile-manager', () => ({
   getClaudeProfileManager: () => mockProfileManager,
   initializeClaudeProfileManager: () => Promise.resolve(mockProfileManager)
 }));

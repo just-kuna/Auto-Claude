@@ -8,7 +8,7 @@ import * as os from 'os';
 import { existsSync } from 'fs';
 import type { TerminalProcess, WindowGetter } from './types';
 import { IPC_CHANNELS } from '../../shared/constants';
-import { getClaudeProfileManager } from '../claude-profile-manager';
+import { getClaudeProfileManager } from '../iflow-profile-manager';
 import { readSettingsFile } from '../settings-utils';
 import { debugLog, debugError } from '../../shared/utils/debug-logger';
 import type { SupportedTerminal } from '../../shared/types/settings';

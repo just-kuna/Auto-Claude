@@ -15,7 +15,7 @@ import type { CompletablePhase } from '../../shared/constants/phase-protocol';
 import { detectRateLimit, createSDKRateLimitInfo, getProfileEnv, detectAuthFailure } from '../rate-limit-detector';
 import { getAPIProfileEnv } from '../services/profile';
 import { projectStore } from '../project-store';
-import { getClaudeProfileManager } from '../claude-profile-manager';
+import { getClaudeProfileManager } from '../iflow-profile-manager';
 import { parsePythonCommand, validatePythonPath } from '../python-detector';
 import { pythonEnvManager, getConfiguredPythonPath } from '../python-env-manager';
 import { buildMemoryEnvVars } from '../memory-env-builder';
