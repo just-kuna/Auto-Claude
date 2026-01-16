@@ -10,7 +10,7 @@ import {
 import { Button } from '../ui/button';
 import { Card, CardContent } from '../ui/card';
 
-interface ClaudeOAuthFlowProps {
+interface IFlowOAuthFlowProps {
   onSuccess: () => void;
   onCancel?: () => void;
 }
@@ -19,7 +19,7 @@ interface ClaudeOAuthFlowProps {
  * Claude OAuth flow component for setup wizard
  * Guides users through authenticating with Claude using claude setup-token
  */
-export function ClaudeOAuthFlow({ onSuccess, onCancel }: ClaudeOAuthFlowProps) {
+export function IFlowOAuthFlow({ onSuccess, onCancel }: IFlowOAuthFlowProps) {
   const [status, setStatus] = useState<'ready' | 'authenticating' | 'success' | 'error'>('ready');
   const [error, setError] = useState<string | null>(null);
   const [email, setEmail] = useState<string | undefined>();

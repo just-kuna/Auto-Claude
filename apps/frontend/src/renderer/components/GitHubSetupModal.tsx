@@ -35,7 +35,7 @@ import {
   SelectValue
 } from './ui/select';
 import { GitHubOAuthFlow } from './project-settings/GitHubOAuthFlow';
-import { ClaudeOAuthFlow } from './project-settings/ClaudeOAuthFlow';
+import { IFlowOAuthFlow } from './project-settings/IFlowOAuthFlow';
 import type { Project, ProjectSettings } from '../../shared/types';
 
 interface GitHubSetupModalProps {
@@ -412,7 +412,7 @@ export function GitHubSetupModal({
             </DialogHeader>
 
             <div className="py-4">
-              <ClaudeOAuthFlow
+              <IFlowOAuthFlow
                 onSuccess={handleClaudeAuthSuccess}
                 onCancel={onSkip}
               />

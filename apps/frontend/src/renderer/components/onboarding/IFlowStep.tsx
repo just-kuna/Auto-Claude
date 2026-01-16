@@ -5,7 +5,7 @@ import { Button } from '../ui/button';
 import { Card, CardContent } from '../ui/card';
 import type { ClaudeCodeVersionInfo } from '../../../shared/types/cli';
 
-interface ClaudeCodeStepProps {
+interface IFlowStepProps {
   onNext: () => void;
   onBack: () => void;
   onSkip: () => void;
@@ -19,7 +19,7 @@ type DetectionStatus = 'loading' | 'installed' | 'outdated' | 'not-found' | 'err
  * Checks if Claude Code CLI is installed, shows version information,
  * and provides one-click installation/update functionality.
  */
-export function ClaudeCodeStep({ onNext, onBack, onSkip }: ClaudeCodeStepProps) {
+export function IFlowStep({ onNext, onBack, onSkip }: IFlowStepProps) {
   const { t } = useTranslation('onboarding');
   const [status, setStatus] = useState<DetectionStatus>('loading');
   const [versionInfo, setVersionInfo] = useState<ClaudeCodeVersionInfo | null>(null);
@@ -35,7 +35,7 @@ export function ClaudeCodeStep({ onNext, onBack, onSkip }: ClaudeCodeStepProps) 
 
     try {
       if (!window.electronAPI?.checkClaudeCodeVersion) {
-        console.warn('[ClaudeCodeStep] Version check API not available');
+        console.warn('[IFlowStep] Version check API not available');
         setStatus('error');
         setError('Version check API not available');
         return;

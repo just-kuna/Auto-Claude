@@ -6,7 +6,7 @@ import { Button } from '../ui/button';
 import { Label } from '../ui/label';
 import type { ProjectEnvConfig } from '../../../shared/types';
 
-interface ClaudeAuthSectionProps {
+interface IFlowAuthSectionProps {
   isExpanded: boolean;
   onToggle: () => void;
   envConfig: ProjectEnvConfig | null;
@@ -18,7 +18,7 @@ interface ClaudeAuthSectionProps {
   onUpdateConfig: (updates: Partial<ProjectEnvConfig>) => void;
 }
 
-export function ClaudeAuthSection({
+export function IFlowAuthSection({
   isExpanded,
   onToggle,
   envConfig,
@@ -28,7 +28,7 @@ export function ClaudeAuthSection({
   authStatus,
   onClaudeSetup,
   onUpdateConfig,
-}: ClaudeAuthSectionProps) {
+}: IFlowAuthSectionProps) {
   const badge = authStatus === 'authenticated' ? (
     <StatusBadge status="success" label="Connected" />
   ) : authStatus === 'not_authenticated' ? (

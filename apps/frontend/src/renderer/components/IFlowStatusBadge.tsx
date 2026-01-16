@@ -34,7 +34,7 @@ import {
 import { cn } from "../lib/utils";
 import type { ClaudeCodeVersionInfo, ClaudeInstallationInfo } from "../../shared/types/cli";
 
-interface ClaudeCodeStatusBadgeProps {
+interface IFlowStatusBadgeProps {
   className?: string;
 }
 
@@ -49,7 +49,7 @@ const VERSION_RECHECK_DELAY_MS = 5000;
  * Claude Code CLI status badge for the sidebar.
  * Shows installation status and provides quick access to install/update.
  */
-export function ClaudeCodeStatusBadge({ className }: ClaudeCodeStatusBadgeProps) {
+export function IFlowStatusBadge({ className }: IFlowStatusBadgeProps) {
   const { t } = useTranslation(["common", "navigation"]);
   const [status, setStatus] = useState<StatusType>("loading");
   const [versionInfo, setVersionInfo] = useState<ClaudeCodeVersionInfo | null>(null);

@@ -14,7 +14,7 @@ import { WizardProgress, WizardStep } from './WizardProgress';
 import { WelcomeStep } from './WelcomeStep';
 import { AuthChoiceStep } from './AuthChoiceStep';
 import { OAuthStep } from './OAuthStep';
-import { ClaudeCodeStep } from './ClaudeCodeStep';
+import { IFlowStep } from './IFlowStep';
 import { DevToolsStep } from './DevToolsStep';
 import { PrivacyStep } from './PrivacyStep';
 import { GraphitiStep } from './GraphitiStep';
@@ -201,7 +201,7 @@ export function OnboardingWizard({
         );
       case 'claude-code':
         return (
-          <ClaudeCodeStep
+          <IFlowStep
             onNext={goToNextStep}
             onBack={goToPreviousStep}
             onSkip={skipWizard}
