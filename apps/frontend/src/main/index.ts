@@ -33,7 +33,7 @@ import { setupIpcHandlers } from './ipc-setup';
 import { AgentManager } from './agent';
 import { TerminalManager } from './terminal-manager';
 import { pythonEnvManager } from './python-env-manager';
-import { getUsageMonitor } from './claude-profile/usage-monitor';
+import { startMonitoring, stopMonitoring } from './iflow-profile/usage-monitor';
 import { initializeUsageMonitorForwarding } from './ipc-handlers/terminal-handlers';
 import { initializeAppUpdater } from './app-updater';
 import { DEFAULT_APP_SETTINGS } from '../shared/constants';
