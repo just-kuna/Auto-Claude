@@ -8,7 +8,7 @@ import { toast } from './use-toast';
  * Listens for onTerminalAuthCreated events and adds the terminal
  * to the store so users can see the OAuth flow output.
  */
-export function useClaudeLoginTerminal() {
+export function useIFlowLoginTerminal() {
   const { t } = useTranslation('terminal');
   const addExternalTerminal = useTerminalStore((state) => state.addExternalTerminal);
 
