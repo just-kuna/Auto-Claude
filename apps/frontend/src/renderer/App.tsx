@@ -54,7 +54,7 @@ import { GitHubSetupModal } from './components/GitHubSetupModal';
 import { useProjectStore, loadProjects, addProject, initializeProject, removeProject } from './stores/project-store';
 import { useTaskStore, loadTasks } from './stores/task-store';
 import { useSettingsStore, loadSettings, loadProfiles } from './stores/settings-store';
-import { useClaudeProfileStore } from './stores/claude-profile-store';
+import { useIFlowProfileStore } from './stores/iflow-profile-store';
 import { useTerminalStore, restoreTerminalSessions } from './stores/terminal-store';
 import { initializeGitHubListeners } from './stores/github';
 import { initDownloadProgressListener } from './stores/download-store';
@@ -118,7 +118,7 @@ export function App() {
   const activeProfileId = useSettingsStore((state) => state.activeProfileId);
 
   // Claude Profile state (OAuth)
-  const claudeProfiles = useClaudeProfileStore((state) => state.profiles);
+  const claudeProfiles = useIFlowProfileStore((state) => state.profiles);
 
   // UI State
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);

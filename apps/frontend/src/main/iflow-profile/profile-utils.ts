@@ -6,7 +6,7 @@
 import { homedir } from 'os';
 import { join } from 'path';
 import { existsSync, readFileSync, readdirSync, mkdirSync } from 'fs';
-import type { ClaudeProfile } from '../../shared/types';
+import type { IFlowProfile } from '../../shared/types';
 
 /**
  * Default Claude config directory
@@ -21,7 +21,7 @@ export const CLAUDE_PROFILES_DIR = join(homedir(), '.iflow-profiles');
 /**
  * Generate a unique ID for a new profile
  */
-export function generateProfileId(name: string, existingProfiles: ClaudeProfile[]): string {
+export function generateProfileId(name: string, existingProfiles: IFlowProfile[]): string {
   const baseId = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
   let id = baseId;
   let counter = 1;
@@ -58,7 +58,7 @@ export async function createProfileDirectory(profileName: string): Promise<strin
  * Check if a profile has valid authentication
  * (checks for OAuth token or config directory credential files)
  */
-export function isProfileAuthenticated(profile: ClaudeProfile): boolean {
+export function isProfileAuthenticated(profile: IFlowProfile): boolean {
   // Check for direct OAuth token first (OAuth-only profiles without configDir)
   // This enables auto-switch to work with profiles that only have oauthToken set
   if (hasValidToken(profile)) {
@@ -131,7 +131,7 @@ export function isProfileAuthenticated(profile: ClaudeProfile): boolean {
  * Check if a profile has a valid OAuth token.
  * Token is valid for 1 year from creation.
  */
-export function hasValidToken(profile: ClaudeProfile): boolean {
+export function hasValidToken(profile: IFlowProfile): boolean {
   if (!profile?.oauthToken) {
     return false;
   }

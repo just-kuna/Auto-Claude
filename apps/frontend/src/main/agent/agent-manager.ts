@@ -5,7 +5,7 @@ import { AgentState } from './agent-state';
 import { AgentEvents } from './agent-events';
 import { AgentProcessManager } from './agent-process';
 import { AgentQueueManager } from './agent-queue';
-import { getClaudeProfileManager, initializeClaudeProfileManager } from '../iflow-profile-manager';
+import { getIFlowProfileManager, initializeIFlowProfileManager } from '../iflow-profile-manager';
 import {
   SpecCreationMetadata,
   TaskExecutionOptions,
@@ -99,7 +99,7 @@ export class AgentManager extends EventEmitter {
     // Ensure profile manager is initialized to prevent race condition
     let profileManager;
     try {
-      profileManager = await initializeClaudeProfileManager();
+      profileManager = await initializeIFlowProfileManager();
     } catch (error) {
       console.error('[AgentManager] Failed to initialize profile manager:', error);
       this.emit('error', taskId, 'Failed to initialize profile manager. Please check file permissions and disk space.');
@@ -185,7 +185,7 @@ export class AgentManager extends EventEmitter {
     // Ensure profile manager is initialized to prevent race condition
     let profileManager;
     try {
-      profileManager = await initializeClaudeProfileManager();
+      profileManager = await initializeIFlowProfileManager();
     } catch (error) {
       console.error('[AgentManager] Failed to initialize profile manager:', error);
       this.emit('error', taskId, 'Failed to initialize profile manager. Please check file permissions and disk space.');
@@ -419,7 +419,7 @@ export class AgentManager extends EventEmitter {
 
     // If a new profile was specified, ensure it's set as active before restart
     if (newProfileId) {
-      const profileManager = getClaudeProfileManager();
+      const profileManager = getIFlowProfileManager();
       const currentActiveId = profileManager.getActiveProfile()?.id;
       if (currentActiveId !== newProfileId) {
         console.log('[AgentManager] Setting active profile to:', newProfileId);

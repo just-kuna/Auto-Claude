@@ -10,9 +10,9 @@ import type {
   IPCResult,
   TerminalCreateOptions,
   RateLimitInfo,
-  ClaudeProfile,
-  ClaudeProfileSettings,
-  ClaudeUsageSnapshot,
+  IFlowProfile,
+  IFlowProfileSettings,
+  IFlowUsageSnapshot,
   CreateTerminalWorktreeRequest,
   TerminalWorktreeConfig,
   TerminalWorktreeResult,
@@ -23,7 +23,7 @@ interface ProactiveSwapNotification {
   fromProfile: { id: string; name: string };
   toProfile: { id: string; name: string };
   reason: string;
-  usageSnapshot: ClaudeUsageSnapshot;
+  usageSnapshot: IFlowUsageSnapshot;
 }
 
 export interface TerminalAPI {
@@ -83,24 +83,24 @@ export interface TerminalAPI {
   onTerminalPendingResume: (callback: (id: string, sessionId?: string) => void) => () => void;
 
   // Claude Profile Management
-  getClaudeProfiles: () => Promise<IPCResult<ClaudeProfileSettings>>;
-  saveClaudeProfile: (profile: ClaudeProfile) => Promise<IPCResult<ClaudeProfile>>;
-  deleteClaudeProfile: (profileId: string) => Promise<IPCResult>;
-  renameClaudeProfile: (profileId: string, newName: string) => Promise<IPCResult>;
-  setActiveClaudeProfile: (profileId: string) => Promise<IPCResult>;
-  switchClaudeProfile: (terminalId: string, profileId: string) => Promise<IPCResult>;
-  initializeClaudeProfile: (profileId: string) => Promise<IPCResult>;
-  setClaudeProfileToken: (profileId: string, token: string, email?: string) => Promise<IPCResult>;
-  getAutoSwitchSettings: () => Promise<IPCResult<import('../../shared/types').ClaudeAutoSwitchSettings>>;
-  updateAutoSwitchSettings: (settings: Partial<import('../../shared/types').ClaudeAutoSwitchSettings>) => Promise<IPCResult>;
-  fetchClaudeUsage: (terminalId: string) => Promise<IPCResult>;
-  getBestAvailableProfile: (excludeProfileId?: string) => Promise<IPCResult<import('../../shared/types').ClaudeProfile | null>>;
+  getIFlowProfiles: () => Promise<IPCResult<IFlowProfileSettings>>;
+  saveIFlowProfile: (profile: IFlowProfile) => Promise<IPCResult<IFlowProfile>>;
+  deleteIFlowProfile: (profileId: string) => Promise<IPCResult>;
+  renameIFlowProfile: (profileId: string, newName: string) => Promise<IPCResult>;
+  setActiveIFlowProfile: (profileId: string) => Promise<IPCResult>;
+  switchIFlowProfile: (terminalId: string, profileId: string) => Promise<IPCResult>;
+  initializeIFlowProfile: (profileId: string) => Promise<IPCResult>;
+  setIFlowProfileToken: (profileId: string, token: string, email?: string) => Promise<IPCResult>;
+  getAutoSwitchSettings: () => Promise<IPCResult<import('../../shared/types').IFlowAutoSwitchSettings>>;
+  updateAutoSwitchSettings: (settings: Partial<import('../../shared/types').IFlowAutoSwitchSettings>) => Promise<IPCResult>;
+  fetchIFlowUsage: (terminalId: string) => Promise<IPCResult>;
+  getBestAvailableProfile: (excludeProfileId?: string) => Promise<IPCResult<import('../../shared/types').IFlowProfile | null>>;
   onSDKRateLimit: (callback: (info: import('../../shared/types').SDKRateLimitInfo) => void) => () => void;
   retryWithProfile: (request: import('../../shared/types').RetryWithProfileRequest) => Promise<IPCResult>;
 
   // Usage Monitoring (Proactive Account Switching)
-  requestUsageUpdate: () => Promise<IPCResult<import('../../shared/types').ClaudeUsageSnapshot | null>>;
-  onUsageUpdated: (callback: (usage: import('../../shared/types').ClaudeUsageSnapshot) => void) => () => void;
+  requestUsageUpdate: () => Promise<IPCResult<import('../../shared/types').IFlowUsageSnapshot | null>>;
+  onUsageUpdated: (callback: (usage: import('../../shared/types').IFlowUsageSnapshot) => void) => () => void;
   onProactiveSwapNotification: (callback: (notification: ProactiveSwapNotification) => void) => () => void;
 }
 
@@ -354,40 +354,40 @@ export const createTerminalAPI = (): TerminalAPI => ({
   },
 
   // Claude Profile Management
-  getClaudeProfiles: (): Promise<IPCResult<ClaudeProfileSettings>> =>
+  getIFlowProfiles: (): Promise<IPCResult<IFlowProfileSettings>> =>
     ipcRenderer.invoke(IPC_CHANNELS.CLAUDE_PROFILES_GET),
 
-  saveClaudeProfile: (profile: ClaudeProfile): Promise<IPCResult<ClaudeProfile>> =>
+  saveIFlowProfile: (profile: IFlowProfile): Promise<IPCResult<IFlowProfile>> =>
     ipcRenderer.invoke(IPC_CHANNELS.CLAUDE_PROFILE_SAVE, profile),
 
-  deleteClaudeProfile: (profileId: string): Promise<IPCResult> =>
+  deleteIFlowProfile: (profileId: string): Promise<IPCResult> =>
     ipcRenderer.invoke(IPC_CHANNELS.CLAUDE_PROFILE_DELETE, profileId),
 
-  renameClaudeProfile: (profileId: string, newName: string): Promise<IPCResult> =>
+  renameIFlowProfile: (profileId: string, newName: string): Promise<IPCResult> =>
     ipcRenderer.invoke(IPC_CHANNELS.CLAUDE_PROFILE_RENAME, profileId, newName),
 
-  setActiveClaudeProfile: (profileId: string): Promise<IPCResult> =>
+  setActiveIFlowProfile: (profileId: string): Promise<IPCResult> =>
     ipcRenderer.invoke(IPC_CHANNELS.CLAUDE_PROFILE_SET_ACTIVE, profileId),
 
-  switchClaudeProfile: (terminalId: string, profileId: string): Promise<IPCResult> =>
+  switchIFlowProfile: (terminalId: string, profileId: string): Promise<IPCResult> =>
     ipcRenderer.invoke(IPC_CHANNELS.CLAUDE_PROFILE_SWITCH, terminalId, profileId),
 
-  initializeClaudeProfile: (profileId: string): Promise<IPCResult> =>
+  initializeIFlowProfile: (profileId: string): Promise<IPCResult> =>
     ipcRenderer.invoke(IPC_CHANNELS.CLAUDE_PROFILE_INITIALIZE, profileId),
 
-  setClaudeProfileToken: (profileId: string, token: string, email?: string): Promise<IPCResult> =>
+  setIFlowProfileToken: (profileId: string, token: string, email?: string): Promise<IPCResult> =>
     ipcRenderer.invoke(IPC_CHANNELS.CLAUDE_PROFILE_SET_TOKEN, profileId, token, email),
 
-  getAutoSwitchSettings: (): Promise<IPCResult<import('../../shared/types').ClaudeAutoSwitchSettings>> =>
+  getAutoSwitchSettings: (): Promise<IPCResult<import('../../shared/types').IFlowAutoSwitchSettings>> =>
     ipcRenderer.invoke(IPC_CHANNELS.CLAUDE_PROFILE_AUTO_SWITCH_SETTINGS),
 
-  updateAutoSwitchSettings: (settings: Partial<import('../../shared/types').ClaudeAutoSwitchSettings>): Promise<IPCResult> =>
+  updateAutoSwitchSettings: (settings: Partial<import('../../shared/types').IFlowAutoSwitchSettings>): Promise<IPCResult> =>
     ipcRenderer.invoke(IPC_CHANNELS.CLAUDE_PROFILE_UPDATE_AUTO_SWITCH, settings),
 
-  fetchClaudeUsage: (terminalId: string): Promise<IPCResult> =>
+  fetchIFlowUsage: (terminalId: string): Promise<IPCResult> =>
     ipcRenderer.invoke(IPC_CHANNELS.CLAUDE_PROFILE_FETCH_USAGE, terminalId),
 
-  getBestAvailableProfile: (excludeProfileId?: string): Promise<IPCResult<import('../../shared/types').ClaudeProfile | null>> =>
+  getBestAvailableProfile: (excludeProfileId?: string): Promise<IPCResult<import('../../shared/types').IFlowProfile | null>> =>
     ipcRenderer.invoke(IPC_CHANNELS.CLAUDE_PROFILE_GET_BEST_PROFILE, excludeProfileId),
 
   onSDKRateLimit: (
@@ -409,15 +409,15 @@ export const createTerminalAPI = (): TerminalAPI => ({
     ipcRenderer.invoke(IPC_CHANNELS.CLAUDE_RETRY_WITH_PROFILE, request),
 
   // Usage Monitoring (Proactive Account Switching)
-  requestUsageUpdate: (): Promise<IPCResult<import('../../shared/types').ClaudeUsageSnapshot | null>> =>
+  requestUsageUpdate: (): Promise<IPCResult<import('../../shared/types').IFlowUsageSnapshot | null>> =>
     ipcRenderer.invoke(IPC_CHANNELS.USAGE_REQUEST),
 
   onUsageUpdated: (
-    callback: (usage: import('../../shared/types').ClaudeUsageSnapshot) => void
+    callback: (usage: import('../../shared/types').IFlowUsageSnapshot) => void
   ): (() => void) => {
     const handler = (
       _event: Electron.IpcRendererEvent,
-      usage: import('../../shared/types').ClaudeUsageSnapshot
+      usage: import('../../shared/types').IFlowUsageSnapshot
     ): void => {
       callback(usage);
     };

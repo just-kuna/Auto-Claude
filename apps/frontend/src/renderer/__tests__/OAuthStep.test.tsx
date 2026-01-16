@@ -5,13 +5,13 @@
  * @vitest-environment jsdom
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import type { ClaudeProfile, ClaudeProfileSettings, ElectronAPI } from '../../shared/types';
+import type { IFlowProfile, IFlowProfileSettings, ElectronAPI } from '../../shared/types';
 
 // Import browser mock to get full ElectronAPI structure
 import '../lib/browser-mock';
 
 // Helper to create test profiles
-function createTestProfile(overrides: Partial<ClaudeProfile> = {}): ClaudeProfile {
+function createTestProfile(overrides: Partial<IFlowProfile> = {}): IFlowProfile {
   return {
     id: `profile-${Date.now()}-${Math.random().toString(36).substring(7)}`,
     name: 'Test Profile',
@@ -22,13 +22,13 @@ function createTestProfile(overrides: Partial<ClaudeProfile> = {}): ClaudeProfil
 }
 
 // Mock functions
-const mockGetClaudeProfiles = vi.fn();
-const mockSaveClaudeProfile = vi.fn();
-const mockDeleteClaudeProfile = vi.fn();
-const mockRenameClaudeProfile = vi.fn();
-const mockSetActiveClaudeProfile = vi.fn();
-const mockInitializeClaudeProfile = vi.fn();
-const mockSetClaudeProfileToken = vi.fn();
+const mockGetIFlowProfiles = vi.fn();
+const mockSaveIFlowProfile = vi.fn();
+const mockDeleteIFlowProfile = vi.fn();
+const mockRenameIFlowProfile = vi.fn();
+const mockSetActiveIFlowProfile = vi.fn();
+const mockInitializeIFlowProfile = vi.fn();
+const mockSetIFlowProfileToken = vi.fn();
 const mockOnTerminalOAuthToken = vi.fn();
 
 describe('OAuthStep Profile Management Logic', () => {
@@ -38,18 +38,18 @@ describe('OAuthStep Profile Management Logic', () => {
 
     // Setup window.electronAPI mocks
     if (window.electronAPI) {
-      window.electronAPI.getClaudeProfiles = mockGetClaudeProfiles;
-      window.electronAPI.saveClaudeProfile = mockSaveClaudeProfile;
-      window.electronAPI.deleteClaudeProfile = mockDeleteClaudeProfile;
-      window.electronAPI.renameClaudeProfile = mockRenameClaudeProfile;
-      window.electronAPI.setActiveClaudeProfile = mockSetActiveClaudeProfile;
-      window.electronAPI.initializeClaudeProfile = mockInitializeClaudeProfile;
-      window.electronAPI.setClaudeProfileToken = mockSetClaudeProfileToken;
+      window.electronAPI.getIFlowProfiles = mockGetIFlowProfiles;
+      window.electronAPI.saveIFlowProfile = mockSaveIFlowProfile;
+      window.electronAPI.deleteIFlowProfile = mockDeleteIFlowProfile;
+      window.electronAPI.renameIFlowProfile = mockRenameIFlowProfile;
+      window.electronAPI.setActiveIFlowProfile = mockSetActiveIFlowProfile;
+      window.electronAPI.initializeIFlowProfile = mockInitializeIFlowProfile;
+      window.electronAPI.setIFlowProfileToken = mockSetIFlowProfileToken;
       window.electronAPI.onTerminalOAuthToken = mockOnTerminalOAuthToken;
     }
 
     // Default mock implementations
-    mockGetClaudeProfiles.mockResolvedValue({
+    mockGetIFlowProfiles.mockResolvedValue({
       success: true,
       data: { profiles: [], activeProfileId: 'default' }
     });
@@ -62,12 +62,12 @@ describe('OAuthStep Profile Management Logic', () => {
 
   describe('Profile List Display', () => {
     it('should handle empty profile list', async () => {
-      mockGetClaudeProfiles.mockResolvedValue({
+      mockGetIFlowProfiles.mockResolvedValue({
         success: true,
         data: { profiles: [], activeProfileId: null }
       });
 
-      const result = await window.electronAPI.getClaudeProfiles();
+      const result = await window.electronAPI.getIFlowProfiles();
       expect(result.success).toBe(true);
       expect(result.data?.profiles).toHaveLength(0);
     });
@@ -78,12 +78,12 @@ describe('OAuthStep Profile Management Logic', () => {
         createTestProfile({ id: 'profile-2', name: 'Personal', oauthToken: 'sk-ant-oat01-test' })
       ];
 
-      mockGetClaudeProfiles.mockResolvedValue({
+      mockGetIFlowProfiles.mockResolvedValue({
         success: true,
         data: { profiles, activeProfileId: 'profile-1' }
       });
 
-      const result = await window.electronAPI.getClaudeProfiles();
+      const result = await window.electronAPI.getIFlowProfiles();
       expect(result.success).toBe(true);
       expect(result.data?.profiles).toHaveLength(2);
       expect(result.data?.activeProfileId).toBe('profile-1');
@@ -117,46 +117,46 @@ describe('OAuthStep Profile Management Logic', () => {
   });
 
   describe('Add Profile Flow', () => {
-    it('should call saveClaudeProfile with correct parameters', async () => {
+    it('should call saveIFlowProfile with correct parameters', async () => {
       const newProfile = {
         id: 'profile-new',
         name: 'New Profile',
-        configDir: '~/.claude-profiles/new-profile',
+        configDir: '~/.iflow-profiles/new-profile',
         isDefault: false,
         createdAt: new Date()
       };
 
-      mockSaveClaudeProfile.mockResolvedValue({
+      mockSaveIFlowProfile.mockResolvedValue({
         success: true,
         data: newProfile
       });
 
-      const result = await window.electronAPI.saveClaudeProfile(newProfile);
-      expect(mockSaveClaudeProfile).toHaveBeenCalledWith(newProfile);
+      const result = await window.electronAPI.saveIFlowProfile(newProfile);
+      expect(mockSaveIFlowProfile).toHaveBeenCalledWith(newProfile);
       expect(result.success).toBe(true);
     });
 
-    it('should call initializeClaudeProfile after saving profile', async () => {
+    it('should call initializeIFlowProfile after saving profile', async () => {
       const newProfile = {
         id: 'profile-new',
         name: 'New Profile',
-        configDir: '~/.claude-profiles/new-profile',
+        configDir: '~/.iflow-profiles/new-profile',
         isDefault: false,
         createdAt: new Date()
       };
 
-      mockSaveClaudeProfile.mockResolvedValue({
+      mockSaveIFlowProfile.mockResolvedValue({
         success: true,
         data: newProfile
       });
 
-      mockInitializeClaudeProfile.mockResolvedValue({ success: true });
+      mockInitializeIFlowProfile.mockResolvedValue({ success: true });
 
-      await window.electronAPI.saveClaudeProfile(newProfile);
-      await window.electronAPI.initializeClaudeProfile(newProfile.id);
+      await window.electronAPI.saveIFlowProfile(newProfile);
+      await window.electronAPI.initializeIFlowProfile(newProfile.id);
 
-      expect(mockSaveClaudeProfile).toHaveBeenCalled();
-      expect(mockInitializeClaudeProfile).toHaveBeenCalledWith(newProfile.id);
+      expect(mockSaveIFlowProfile).toHaveBeenCalled();
+      expect(mockInitializeIFlowProfile).toHaveBeenCalledWith(newProfile.id);
     });
 
     it('should generate profile slug from name', () => {
@@ -165,13 +165,13 @@ describe('OAuthStep Profile Management Logic', () => {
       expect(profileSlug).toBe('work-account');
     });
 
-    it('should handle saveClaudeProfile failure', async () => {
-      mockSaveClaudeProfile.mockResolvedValue({
+    it('should handle saveIFlowProfile failure', async () => {
+      mockSaveIFlowProfile.mockResolvedValue({
         success: false,
         error: 'Failed to save profile'
       });
 
-      const result = await window.electronAPI.saveClaudeProfile({
+      const result = await window.electronAPI.saveIFlowProfile({
         id: 'profile-fail',
         name: 'Failing Profile',
         isDefault: false,
@@ -184,23 +184,23 @@ describe('OAuthStep Profile Management Logic', () => {
   });
 
   describe('OAuth Authentication Flow', () => {
-    it('should call initializeClaudeProfile to trigger OAuth flow', async () => {
-      mockInitializeClaudeProfile.mockResolvedValue({ success: true });
+    it('should call initializeIFlowProfile to trigger OAuth flow', async () => {
+      mockInitializeIFlowProfile.mockResolvedValue({ success: true });
 
       const profileId = 'profile-1';
-      const result = await window.electronAPI.initializeClaudeProfile(profileId);
+      const result = await window.electronAPI.initializeIFlowProfile(profileId);
 
-      expect(mockInitializeClaudeProfile).toHaveBeenCalledWith(profileId);
+      expect(mockInitializeIFlowProfile).toHaveBeenCalledWith(profileId);
       expect(result.success).toBe(true);
     });
 
-    it('should handle initializeClaudeProfile failure', async () => {
-      mockInitializeClaudeProfile.mockResolvedValue({
+    it('should handle initializeIFlowProfile failure', async () => {
+      mockInitializeIFlowProfile.mockResolvedValue({
         success: false,
         error: 'Browser failed to open'
       });
 
-      const result = await window.electronAPI.initializeClaudeProfile('profile-1');
+      const result = await window.electronAPI.initializeIFlowProfile('profile-1');
       expect(result.success).toBe(false);
     });
 
@@ -215,85 +215,85 @@ describe('OAuthStep Profile Management Logic', () => {
   });
 
   describe('Set Active Profile', () => {
-    it('should call setActiveClaudeProfile with correct profileId', async () => {
-      mockSetActiveClaudeProfile.mockResolvedValue({ success: true });
+    it('should call setActiveIFlowProfile with correct profileId', async () => {
+      mockSetActiveIFlowProfile.mockResolvedValue({ success: true });
 
       const profileId = 'profile-2';
-      const result = await window.electronAPI.setActiveClaudeProfile(profileId);
+      const result = await window.electronAPI.setActiveIFlowProfile(profileId);
 
-      expect(mockSetActiveClaudeProfile).toHaveBeenCalledWith(profileId);
+      expect(mockSetActiveIFlowProfile).toHaveBeenCalledWith(profileId);
       expect(result.success).toBe(true);
     });
 
-    it('should handle setActiveClaudeProfile failure', async () => {
-      mockSetActiveClaudeProfile.mockResolvedValue({
+    it('should handle setActiveIFlowProfile failure', async () => {
+      mockSetActiveIFlowProfile.mockResolvedValue({
         success: false,
         error: 'Profile not found'
       });
 
-      const result = await window.electronAPI.setActiveClaudeProfile('invalid-id');
+      const result = await window.electronAPI.setActiveIFlowProfile('invalid-id');
       expect(result.success).toBe(false);
     });
   });
 
   describe('Delete Profile', () => {
-    it('should call deleteClaudeProfile with correct profileId', async () => {
-      mockDeleteClaudeProfile.mockResolvedValue({ success: true });
+    it('should call deleteIFlowProfile with correct profileId', async () => {
+      mockDeleteIFlowProfile.mockResolvedValue({ success: true });
 
       const profileId = 'profile-to-delete';
-      const result = await window.electronAPI.deleteClaudeProfile(profileId);
+      const result = await window.electronAPI.deleteIFlowProfile(profileId);
 
-      expect(mockDeleteClaudeProfile).toHaveBeenCalledWith(profileId);
+      expect(mockDeleteIFlowProfile).toHaveBeenCalledWith(profileId);
       expect(result.success).toBe(true);
     });
   });
 
   describe('Rename Profile', () => {
-    it('should call renameClaudeProfile with correct parameters', async () => {
-      mockRenameClaudeProfile.mockResolvedValue({ success: true });
+    it('should call renameIFlowProfile with correct parameters', async () => {
+      mockRenameIFlowProfile.mockResolvedValue({ success: true });
 
       const profileId = 'profile-1';
       const newName = 'Updated Profile Name';
-      const result = await window.electronAPI.renameClaudeProfile(profileId, newName);
+      const result = await window.electronAPI.renameIFlowProfile(profileId, newName);
 
-      expect(mockRenameClaudeProfile).toHaveBeenCalledWith(profileId, newName);
+      expect(mockRenameIFlowProfile).toHaveBeenCalledWith(profileId, newName);
       expect(result.success).toBe(true);
     });
   });
 
   describe('Manual Token Entry', () => {
-    it('should call setClaudeProfileToken with token and email', async () => {
-      mockSetClaudeProfileToken.mockResolvedValue({ success: true });
+    it('should call setIFlowProfileToken with token and email', async () => {
+      mockSetIFlowProfileToken.mockResolvedValue({ success: true });
 
       const profileId = 'profile-1';
       const token = 'sk-ant-oat01-manual-token';
       const email = 'user@example.com';
 
-      const result = await window.electronAPI.setClaudeProfileToken(profileId, token, email);
+      const result = await window.electronAPI.setIFlowProfileToken(profileId, token, email);
 
-      expect(mockSetClaudeProfileToken).toHaveBeenCalledWith(profileId, token, email);
+      expect(mockSetIFlowProfileToken).toHaveBeenCalledWith(profileId, token, email);
       expect(result.success).toBe(true);
     });
 
-    it('should call setClaudeProfileToken with token only (no email)', async () => {
-      mockSetClaudeProfileToken.mockResolvedValue({ success: true });
+    it('should call setIFlowProfileToken with token only (no email)', async () => {
+      mockSetIFlowProfileToken.mockResolvedValue({ success: true });
 
       const profileId = 'profile-1';
       const token = 'sk-ant-oat01-manual-token';
 
-      const result = await window.electronAPI.setClaudeProfileToken(profileId, token, undefined);
+      const result = await window.electronAPI.setIFlowProfileToken(profileId, token, undefined);
 
-      expect(mockSetClaudeProfileToken).toHaveBeenCalledWith(profileId, token, undefined);
+      expect(mockSetIFlowProfileToken).toHaveBeenCalledWith(profileId, token, undefined);
       expect(result.success).toBe(true);
     });
 
-    it('should handle setClaudeProfileToken failure', async () => {
-      mockSetClaudeProfileToken.mockResolvedValue({
+    it('should handle setIFlowProfileToken failure', async () => {
+      mockSetIFlowProfileToken.mockResolvedValue({
         success: false,
         error: 'Invalid token format'
       });
 
-      const result = await window.electronAPI.setClaudeProfileToken(
+      const result = await window.electronAPI.setIFlowProfileToken(
         'profile-1',
         'invalid-token',
         undefined
@@ -306,7 +306,7 @@ describe('OAuthStep Profile Management Logic', () => {
 
   describe('Continue Button State', () => {
     it('should enable Continue when at least one profile is authenticated', () => {
-      const profiles: ClaudeProfile[] = [
+      const profiles: IFlowProfile[] = [
         createTestProfile({ id: 'p1', oauthToken: undefined }),
         createTestProfile({ id: 'p2', oauthToken: 'sk-ant-oat01-token' })
       ];
@@ -319,7 +319,7 @@ describe('OAuthStep Profile Management Logic', () => {
     });
 
     it('should disable Continue when no profiles are authenticated', () => {
-      const profiles: ClaudeProfile[] = [
+      const profiles: IFlowProfile[] = [
         createTestProfile({ id: 'p1', oauthToken: undefined }),
         createTestProfile({ id: 'p2', oauthToken: undefined })
       ];
@@ -332,7 +332,7 @@ describe('OAuthStep Profile Management Logic', () => {
     });
 
     it('should disable Continue when no profiles exist', () => {
-      const profiles: ClaudeProfile[] = [];
+      const profiles: IFlowProfile[] = [];
 
       const hasAuthenticatedProfile = profiles.some(
         (profile) => profile.oauthToken || (profile.isDefault && profile.configDir)
@@ -342,7 +342,7 @@ describe('OAuthStep Profile Management Logic', () => {
     });
 
     it('should enable Continue with default profile with configDir', () => {
-      const profiles: ClaudeProfile[] = [
+      const profiles: IFlowProfile[] = [
         createTestProfile({ id: 'default', isDefault: true, configDir: '~/.claude' })
       ];
 
@@ -376,19 +376,19 @@ describe('OAuthStep Profile Management Logic', () => {
   });
 
   describe('Error Handling', () => {
-    it('should handle getClaudeProfiles failure gracefully', async () => {
-      mockGetClaudeProfiles.mockRejectedValue(new Error('Network error'));
+    it('should handle getIFlowProfiles failure gracefully', async () => {
+      mockGetIFlowProfiles.mockRejectedValue(new Error('Network error'));
 
-      await expect(window.electronAPI.getClaudeProfiles()).rejects.toThrow('Network error');
+      await expect(window.electronAPI.getIFlowProfiles()).rejects.toThrow('Network error');
     });
 
     it('should handle API returning unsuccessful response', async () => {
-      mockGetClaudeProfiles.mockResolvedValue({
+      mockGetIFlowProfiles.mockResolvedValue({
         success: false,
         error: 'Database connection failed'
       });
 
-      const result = await window.electronAPI.getClaudeProfiles();
+      const result = await window.electronAPI.getIFlowProfiles();
       expect(result.success).toBe(false);
       expect(result.error).toBe('Database connection failed');
     });
@@ -396,7 +396,7 @@ describe('OAuthStep Profile Management Logic', () => {
 
   describe('Active Profile Highlighting', () => {
     it('should identify active profile correctly', () => {
-      const profiles: ClaudeProfile[] = [
+      const profiles: IFlowProfile[] = [
         createTestProfile({ id: 'p1', name: 'Work' }),
         createTestProfile({ id: 'p2', name: 'Personal' })
       ];
@@ -407,7 +407,7 @@ describe('OAuthStep Profile Management Logic', () => {
     });
 
     it('should handle when no profile is active', () => {
-      const profiles: ClaudeProfile[] = [
+      const profiles: IFlowProfile[] = [
         createTestProfile({ id: 'p1', name: 'Work' })
       ];
       const activeProfileId: string | null = null;
@@ -426,7 +426,7 @@ describe('OAuthStep Profile Management Logic', () => {
     });
 
     it('should show "Active" badge for active profile', () => {
-      const profiles: ClaudeProfile[] = [
+      const profiles: IFlowProfile[] = [
         createTestProfile({ id: 'p1' }),
         createTestProfile({ id: 'p2' })
       ];

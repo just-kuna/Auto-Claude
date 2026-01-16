@@ -21,7 +21,7 @@ import { Switch } from './ui/switch';
 import { Label } from './ui/label';
 import { Input } from './ui/input';
 import { useRateLimitStore } from '../stores/rate-limit-store';
-import { useClaudeProfileStore, loadClaudeProfiles } from '../stores/claude-profile-store';
+import { useIFlowProfileStore, loadIFlowProfiles } from '../stores/iflow-profile-store';
 import { useToast } from '../hooks/use-toast';
 import { debugError } from '../../shared/utils/debug-logger';
 import type { SDKRateLimitInfo } from '../../shared/types';
@@ -57,7 +57,7 @@ function getSourceIcon(source: SDKRateLimitInfo['source']) {
 
 export function SDKRateLimitModal() {
   const { isSDKModalOpen, sdkRateLimitInfo, hideSDKRateLimitModal, clearPendingRateLimit } = useRateLimitStore();
-  const { profiles, isSwitching, setSwitching } = useClaudeProfileStore();
+  const { profiles, isSwitching, setSwitching } = useIFlowProfileStore();
   const { toast } = useToast();
   const { t } = useTranslation('common');
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
@@ -76,7 +76,7 @@ export function SDKRateLimitModal() {
   // Load profiles and auto-switch settings when modal opens
   useEffect(() => {
     if (isSDKModalOpen) {
-      loadClaudeProfiles();
+      loadIFlowProfiles();
       loadAutoSwitchSettings();
 
       // Pre-select the suggested profile if available
@@ -145,22 +145,22 @@ export function SDKRateLimitModal() {
       const profileName = newProfileName.trim();
       const profileSlug = profileName.toLowerCase().replace(/\s+/g, '-');
 
-      const result = await window.electronAPI.saveClaudeProfile({
+      const result = await window.electronAPI.saveIFlowProfile({
         id: `profile-${Date.now()}`,
         name: profileName,
         // Use a placeholder - the backend will resolve the actual path
-        configDir: `~/.claude-profiles/${profileSlug}`,
+        configDir: `~/.iflow-profiles/${profileSlug}`,
         isDefault: false,
         createdAt: new Date()
       });
 
       if (result.success && result.data) {
         // Initialize the profile (creates terminal and runs claude setup-token)
-        const initResult = await window.electronAPI.initializeClaudeProfile(result.data.id);
+        const initResult = await window.electronAPI.initializeIFlowProfile(result.data.id);
 
         if (initResult.success) {
           // Reload profiles
-          loadClaudeProfiles();
+          loadIFlowProfiles();
           setNewProfileName('');
           // Close the modal so user can see the terminal
           hideSDKRateLimitModal();
@@ -198,7 +198,7 @@ export function SDKRateLimitModal() {
 
     try {
       // First, set the active profile
-      await window.electronAPI.setActiveClaudeProfile(selectedProfileId);
+      await window.electronAPI.setActiveIFlowProfile(selectedProfileId);
 
       // Then retry the operation
       const result = await window.electronAPI.retryWithProfile({

@@ -3,7 +3,7 @@
  * Detects rate limit errors in stdout/stderr output and provides context.
  */
 
-import { getClaudeProfileManager } from './iflow-profile-manager';
+import { getIFlowProfileManager } from './iflow-profile-manager';
 
 /**
  * Regex pattern to detect Claude Code rate limit messages
@@ -106,7 +106,7 @@ export function detectRateLimit(
     const limitType = classifyLimitType(resetTime);
 
     // Record the rate limit event in the profile manager
-    const profileManager = getClaudeProfileManager();
+    const profileManager = getIFlowProfileManager();
     const effectiveProfileId = profileId || profileManager.getActiveProfile().id;
 
     try {
@@ -134,7 +134,7 @@ export function detectRateLimit(
   // Check for secondary rate limit indicators
   for (const pattern of RATE_LIMIT_INDICATORS) {
     if (pattern.test(output)) {
-      const profileManager = getClaudeProfileManager();
+      const profileManager = getIFlowProfileManager();
       const effectiveProfileId = profileId || profileManager.getActiveProfile().id;
       const bestProfile = profileManager.getBestAvailableProfile(effectiveProfileId);
 
@@ -218,7 +218,7 @@ export function detectAuthFailure(
   // Check for authentication failure patterns
   for (const pattern of AUTH_FAILURE_PATTERNS) {
     if (pattern.test(output)) {
-      const profileManager = getClaudeProfileManager();
+      const profileManager = getIFlowProfileManager();
       const effectiveProfileId = profileId || profileManager.getActiveProfile().id;
       const failureType = classifyAuthFailureType(output);
 
@@ -249,7 +249,7 @@ export function isAuthFailureError(output: string): boolean {
  * Note: Tokens are decrypted automatically by the profile manager.
  */
 export function getProfileEnv(profileId?: string): Record<string, string> {
-  const profileManager = getClaudeProfileManager();
+  const profileManager = getIFlowProfileManager();
   const profile = profileId
     ? profileManager.getProfile(profileId)
     : profileManager.getActiveProfile();
@@ -308,7 +308,7 @@ export function getProfileEnv(profileId?: string): Record<string, string> {
  * Get the active Claude profile ID
  */
 export function getActiveProfileId(): string {
-  return getClaudeProfileManager().getActiveProfile().id;
+  return getIFlowProfileManager().getActiveProfile().id;
 }
 
 /**
@@ -362,7 +362,7 @@ export function createSDKRateLimitInfo(
     taskId?: string;
   }
 ): SDKRateLimitInfo {
-  const profileManager = getClaudeProfileManager();
+  const profileManager = getIFlowProfileManager();
   const profile = detection.profileId
     ? profileManager.getProfile(detection.profileId)
     : profileManager.getActiveProfile();

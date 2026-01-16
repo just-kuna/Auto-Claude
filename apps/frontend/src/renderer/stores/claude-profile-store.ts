@@ -1,29 +1,29 @@
 import { create } from 'zustand';
-import type { ClaudeProfile, ClaudeProfileSettings } from '../../shared/types';
+import type { IFlowProfile, IFlowProfileSettings } from '../../shared/types';
 
-interface ClaudeProfileState {
-  profiles: ClaudeProfile[];
+interface IFlowProfileState {
+  profiles: IFlowProfile[];
   activeProfileId: string;
   isLoading: boolean;
   isSwitching: boolean;
 
   // Actions
-  setProfiles: (settings: ClaudeProfileSettings) => void;
+  setProfiles: (settings: IFlowProfileSettings) => void;
   setActiveProfile: (profileId: string) => void;
-  addProfile: (profile: ClaudeProfile) => void;
-  updateProfile: (profile: ClaudeProfile) => void;
+  addProfile: (profile: IFlowProfile) => void;
+  updateProfile: (profile: IFlowProfile) => void;
   removeProfile: (profileId: string) => void;
   setLoading: (loading: boolean) => void;
   setSwitching: (switching: boolean) => void;
 }
 
-export const useClaudeProfileStore = create<ClaudeProfileState>((set) => ({
+export const useIFlowProfileStore = create<IFlowProfileState>((set) => ({
   profiles: [],
   activeProfileId: 'default',
   isLoading: false,
   isSwitching: false,
 
-  setProfiles: (settings: ClaudeProfileSettings) => {
+  setProfiles: (settings: IFlowProfileSettings) => {
     set({
       profiles: settings.profiles,
       activeProfileId: settings.activeProfileId
@@ -34,13 +34,13 @@ export const useClaudeProfileStore = create<ClaudeProfileState>((set) => ({
     set({ activeProfileId: profileId });
   },
 
-  addProfile: (profile: ClaudeProfile) => {
+  addProfile: (profile: IFlowProfile) => {
     set((state) => ({
       profiles: [...state.profiles, profile]
     }));
   },
 
-  updateProfile: (profile: ClaudeProfile) => {
+  updateProfile: (profile: IFlowProfile) => {
     set((state) => ({
       profiles: state.profiles.map((p) =>
         p.id === profile.id ? profile : p
@@ -66,17 +66,17 @@ export const useClaudeProfileStore = create<ClaudeProfileState>((set) => ({
 /**
  * Load Claude profiles from the main process
  */
-export async function loadClaudeProfiles(): Promise<void> {
-  const store = useClaudeProfileStore.getState();
+export async function loadIFlowProfiles(): Promise<void> {
+  const store = useIFlowProfileStore.getState();
   store.setLoading(true);
 
   try {
-    const result = await window.electronAPI.getClaudeProfiles();
+    const result = await window.electronAPI.getIFlowProfiles();
     if (result.success && result.data) {
       store.setProfiles(result.data);
     }
   } catch (error) {
-    console.error('[ClaudeProfileStore] Error loading profiles:', error);
+    console.error('[IFlowProfileStore] Error loading profiles:', error);
   } finally {
     store.setLoading(false);
   }
@@ -89,18 +89,18 @@ export async function switchTerminalToProfile(
   terminalId: string,
   profileId: string
 ): Promise<boolean> {
-  const store = useClaudeProfileStore.getState();
+  const store = useIFlowProfileStore.getState();
   store.setSwitching(true);
 
   try {
-    const result = await window.electronAPI.switchClaudeProfile(terminalId, profileId);
+    const result = await window.electronAPI.switchIFlowProfile(terminalId, profileId);
     if (result.success) {
       store.setActiveProfile(profileId);
       return true;
     }
     return false;
   } catch (error) {
-    console.error('[ClaudeProfileStore] Error switching profile:', error);
+    console.error('[IFlowProfileStore] Error switching profile:', error);
     return false;
   } finally {
     store.setSwitching(false);

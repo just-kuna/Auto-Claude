@@ -25,10 +25,10 @@ import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Card, CardContent } from '../ui/card';
 import { cn } from '../../lib/utils';
-import { loadClaudeProfiles as loadGlobalClaudeProfiles } from '../../stores/claude-profile-store';
+import { loadIFlowProfiles as loadGlobalIFlowProfiles } from '../../stores/iflow-profile-store';
 import { useClaudeLoginTerminal } from '../../hooks/useClaudeLoginTerminal';
 import { useToast } from '../../hooks/use-toast';
-import type { ClaudeProfile } from '../../../shared/types';
+import type { IFlowProfile } from '../../../shared/types';
 
 interface OAuthStepProps {
   onNext: () => void;
@@ -46,7 +46,7 @@ export function OAuthStep({ onNext, onBack, onSkip }: OAuthStepProps) {
   const { toast } = useToast();
 
   // Claude Profiles state
-  const [claudeProfiles, setClaudeProfiles] = useState<ClaudeProfile[]>([]);
+  const [claudeProfiles, setIFlowProfiles] = useState<IFlowProfile[]>([]);
   const [activeProfileId, setActiveProfileId] = useState<string | null>(null);
   const [isLoadingProfiles, setIsLoadingProfiles] = useState(true);
   const [newProfileName, setNewProfileName] = useState('');
@@ -72,16 +72,16 @@ export function OAuthStep({ onNext, onBack, onSkip }: OAuthStepProps) {
   );
 
   // Reusable function to load Claude profiles
-  const loadClaudeProfiles = async () => {
+  const loadIFlowProfiles = async () => {
     setIsLoadingProfiles(true);
     setError(null);
     try {
-      const result = await window.electronAPI.getClaudeProfiles();
+      const result = await window.electronAPI.getIFlowProfiles();
       if (result.success && result.data) {
-        setClaudeProfiles(result.data.profiles);
+        setIFlowProfiles(result.data.profiles);
         setActiveProfileId(result.data.activeProfileId);
         // Also update the global store
-        await loadGlobalClaudeProfiles();
+        await loadGlobalIFlowProfiles();
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load profiles');
@@ -92,7 +92,7 @@ export function OAuthStep({ onNext, onBack, onSkip }: OAuthStepProps) {
 
   // Load Claude profiles on mount
   useEffect(() => {
-    loadClaudeProfiles();
+    loadIFlowProfiles();
   }, []);
 
   // Listen for login terminal creation - makes the terminal visible so user can see OAuth flow
@@ -103,7 +103,7 @@ export function OAuthStep({ onNext, onBack, onSkip }: OAuthStepProps) {
     const unsubscribe = window.electronAPI.onTerminalOAuthToken(async (info) => {
       if (info.success && info.profileId) {
         // Reload profiles to show updated state
-        await loadClaudeProfiles();
+        await loadIFlowProfiles();
         // Show simple success notification (non-blocking)
         toast({
           title: t('oauth.toast.authSuccess'),
@@ -137,26 +137,26 @@ export function OAuthStep({ onNext, onBack, onSkip }: OAuthStepProps) {
         return;
       }
 
-      const result = await window.electronAPI.saveClaudeProfile({
+      const result = await window.electronAPI.saveIFlowProfile({
         id: `profile-${Date.now()}`,
         name: profileName,
-        configDir: `~/.claude-profiles/${profileSlug}`,
+        configDir: `~/.iflow-profiles/${profileSlug}`,
         isDefault: false,
         createdAt: new Date()
       });
 
       if (result.success && result.data) {
         // Initialize the profile (starts OAuth flow)
-        const initResult = await window.electronAPI.initializeClaudeProfile(result.data.id);
+        const initResult = await window.electronAPI.initializeIFlowProfile(result.data.id);
 
         if (initResult.success) {
-          await loadClaudeProfiles();
+          await loadIFlowProfiles();
           setNewProfileName('');
 
           // Note: The terminal is now visible in the UI via the onTerminalAuthCreated event
           // Users can see the 'claude setup-token' output directly
         } else {
-          await loadClaudeProfiles();
+          await loadIFlowProfiles();
           toast({
             variant: 'destructive',
             title: t('oauth.toast.authStartFailed'),
@@ -180,9 +180,9 @@ export function OAuthStep({ onNext, onBack, onSkip }: OAuthStepProps) {
     setDeletingProfileId(profileId);
     setError(null);
     try {
-      const result = await window.electronAPI.deleteClaudeProfile(profileId);
+      const result = await window.electronAPI.deleteIFlowProfile(profileId);
       if (result.success) {
-        await loadClaudeProfiles();
+        await loadIFlowProfiles();
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to delete profile');
@@ -191,7 +191,7 @@ export function OAuthStep({ onNext, onBack, onSkip }: OAuthStepProps) {
     }
   };
 
-  const startEditingProfile = (profile: ClaudeProfile) => {
+  const startEditingProfile = (profile: IFlowProfile) => {
     setEditingProfileId(profile.id);
     setEditingProfileName(profile.name);
   };
@@ -206,9 +206,9 @@ export function OAuthStep({ onNext, onBack, onSkip }: OAuthStepProps) {
 
     setError(null);
     try {
-      const result = await window.electronAPI.renameClaudeProfile(editingProfileId, editingProfileName.trim());
+      const result = await window.electronAPI.renameIFlowProfile(editingProfileId, editingProfileName.trim());
       if (result.success) {
-        await loadClaudeProfiles();
+        await loadIFlowProfiles();
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to rename profile');
@@ -221,10 +221,10 @@ export function OAuthStep({ onNext, onBack, onSkip }: OAuthStepProps) {
   const handleSetActiveProfile = async (profileId: string) => {
     setError(null);
     try {
-      const result = await window.electronAPI.setActiveClaudeProfile(profileId);
+      const result = await window.electronAPI.setActiveIFlowProfile(profileId);
       if (result.success) {
         setActiveProfileId(profileId);
-        await loadGlobalClaudeProfiles();
+        await loadGlobalIFlowProfiles();
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to set active profile');
@@ -235,7 +235,7 @@ export function OAuthStep({ onNext, onBack, onSkip }: OAuthStepProps) {
     setAuthenticatingProfileId(profileId);
     setError(null);
     try {
-      const initResult = await window.electronAPI.initializeClaudeProfile(profileId);
+      const initResult = await window.electronAPI.initializeIFlowProfile(profileId);
       if (!initResult.success) {
         toast({
           variant: 'destructive',
@@ -277,13 +277,13 @@ export function OAuthStep({ onNext, onBack, onSkip }: OAuthStepProps) {
     setSavingTokenProfileId(profileId);
     setError(null);
     try {
-      const result = await window.electronAPI.setClaudeProfileToken(
+      const result = await window.electronAPI.setIFlowProfileToken(
         profileId,
         manualToken.trim(),
         manualTokenEmail.trim() || undefined
       );
       if (result.success) {
-        await loadClaudeProfiles();
+        await loadIFlowProfiles();
         setExpandedTokenProfileId(null);
         setManualToken('');
         setManualTokenEmail('');

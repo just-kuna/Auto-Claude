@@ -5,11 +5,11 @@
 
 // Core types
 export type {
-  ClaudeProfile,
-  ClaudeProfileSettings,
-  ClaudeUsageData,
-  ClaudeRateLimitEvent,
-  ClaudeAutoSwitchSettings
+  IFlowProfile,
+  IFlowProfileSettings,
+  IFlowUsageData,
+  IFlowRateLimitEvent,
+  IFlowAutoSwitchSettings
 } from './types';
 
 // Token encryption utilities

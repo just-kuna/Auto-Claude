@@ -6,9 +6,9 @@
 export type {
   IFlowProfile,
   IFlowProfileSettings,
-  ClaudeUsageData,
-  ClaudeRateLimitEvent,
-  ClaudeAutoSwitchSettings
+  IFlowUsageData,
+  IFlowRateLimitEvent,
+  IFlowAutoSwitchSettings
 } from '../../shared/types';
 
 export type { ProfileStoreData } from './profile-storage';

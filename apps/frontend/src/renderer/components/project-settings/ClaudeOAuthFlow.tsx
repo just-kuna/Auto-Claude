@@ -82,7 +82,7 @@ export function ClaudeOAuthFlow({ onSuccess, onCancel }: ClaudeOAuthFlowProps) {
 
     try {
       // Get the active profile ID
-      const profilesResult = await window.electronAPI.getClaudeProfiles();
+      const profilesResult = await window.electronAPI.getIFlowProfiles();
 
       if (!profilesResult.success || !profilesResult.data) {
         throw new Error('Failed to get Claude profiles');
@@ -92,7 +92,7 @@ export function ClaudeOAuthFlow({ onSuccess, onCancel }: ClaudeOAuthFlowProps) {
       console.warn('[ClaudeOAuth] Initializing profile:', activeProfileId);
 
       // Initialize the profile - this opens a terminal and runs 'claude setup-token'
-      const result = await window.electronAPI.initializeClaudeProfile(activeProfileId);
+      const result = await window.electronAPI.initializeIFlowProfile(activeProfileId);
 
       if (!result.success) {
         throw new Error(result.error || 'Failed to start authentication');

@@ -15,11 +15,11 @@ import { app } from 'electron';
 import { join } from 'path';
 import { mkdir } from 'fs/promises';
 import type {
-  ClaudeProfile,
-  ClaudeProfileSettings,
-  ClaudeUsageData,
-  ClaudeRateLimitEvent,
-  ClaudeAutoSwitchSettings
+  IFlowProfile,
+  IFlowProfileSettings,
+  IFlowUsageData,
+  IFlowRateLimitEvent,
+  IFlowAutoSwitchSettings
 } from '../shared/types';
 
 // Module imports
@@ -56,7 +56,7 @@ import {
  * Profiles are stored in the app's userData directory.
  * Each profile points to a separate Claude config directory.
  */
-export class ClaudeProfileManager {
+export class IFlowProfileManager {
   private storePath: string;
   private configDir: string;
   private data: ProfileStoreData;
@@ -73,7 +73,7 @@ export class ClaudeProfileManager {
 
   /**
    * Initialize the profile manager asynchronously (non-blocking)
-   * This should be called at app startup via initializeClaudeProfileManager()
+   * This should be called at app startup via initializeIFlowProfileManager()
    */
   async initialize(): Promise<void> {
     if (this.initialized) return;
@@ -89,7 +89,7 @@ export class ClaudeProfileManager {
     // else: keep the default data from constructor
 
     this.initialized = true;
-    console.warn('[ClaudeProfileManager] Initialized asynchronously');
+    console.warn('[IFlowProfileManager] Initialized asynchronously');
   }
 
   /**
@@ -116,7 +116,7 @@ export class ClaudeProfileManager {
    * Create default profile data
    */
   private createDefaultData(): ProfileStoreData {
-    const defaultProfile: ClaudeProfile = {
+    const defaultProfile: IFlowProfile = {
       id: 'default',
       name: 'Default',
       configDir: DEFAULT_CLAUDE_CONFIG_DIR,
@@ -143,7 +143,7 @@ export class ClaudeProfileManager {
   /**
    * Get all profiles and settings
    */
-  getSettings(): ClaudeProfileSettings {
+  getSettings(): IFlowProfileSettings {
     return {
       profiles: this.data.profiles,
       activeProfileId: this.data.activeProfileId,
@@ -154,14 +154,14 @@ export class ClaudeProfileManager {
   /**
    * Get auto-switch settings
    */
-  getAutoSwitchSettings(): ClaudeAutoSwitchSettings {
+  getAutoSwitchSettings(): IFlowAutoSwitchSettings {
     return this.data.autoSwitch || DEFAULT_AUTO_SWITCH_SETTINGS;
   }
 
   /**
    * Update auto-switch settings
    */
-  updateAutoSwitchSettings(settings: Partial<ClaudeAutoSwitchSettings>): void {
+  updateAutoSwitchSettings(settings: Partial<IFlowAutoSwitchSettings>): void {
     this.data.autoSwitch = {
       ...(this.data.autoSwitch || DEFAULT_AUTO_SWITCH_SETTINGS),
       ...settings
@@ -172,14 +172,14 @@ export class ClaudeProfileManager {
   /**
    * Get a specific profile by ID
    */
-  getProfile(profileId: string): ClaudeProfile | undefined {
+  getProfile(profileId: string): IFlowProfile | undefined {
     return this.data.profiles.find(p => p.id === profileId);
   }
 
   /**
    * Get the active profile
    */
-  getActiveProfile(): ClaudeProfile {
+  getActiveProfile(): IFlowProfile {
     const active = this.data.profiles.find(p => p.id === this.data.activeProfileId);
     if (!active) {
       // Fallback to default
@@ -196,7 +196,7 @@ export class ClaudeProfileManager {
   /**
    * Save or update a profile
    */
-  saveProfile(profile: ClaudeProfile): ClaudeProfile {
+  saveProfile(profile: IFlowProfile): IFlowProfile {
     // Expand ~ in configDir path
     if (profile.configDir) {
       profile.configDir = expandHomePath(profile.configDir);
@@ -227,13 +227,13 @@ export class ClaudeProfileManager {
 
     // Cannot delete default profile
     if (profile.isDefault) {
-      console.warn('[ClaudeProfileManager] Cannot delete default profile');
+      console.warn('[IFlowProfileManager] Cannot delete default profile');
       return false;
     }
 
     // Cannot delete if it's the only profile
     if (this.data.profiles.length <= 1) {
-      console.warn('[ClaudeProfileManager] Cannot delete last profile');
+      console.warn('[IFlowProfileManager] Cannot delete last profile');
       return false;
     }
 
@@ -261,13 +261,13 @@ export class ClaudeProfileManager {
 
     // Cannot rename to empty name
     if (!newName.trim()) {
-      console.warn('[ClaudeProfileManager] Cannot rename to empty name');
+      console.warn('[IFlowProfileManager] Cannot rename to empty name');
       return false;
     }
 
     profile.name = newName.trim();
     this.save();
-    console.warn('[ClaudeProfileManager] Renamed profile:', profileId, 'to:', newName);
+    console.warn('[IFlowProfileManager] Renamed profile:', profileId, 'to:', newName);
     return true;
   }
 
@@ -344,7 +344,7 @@ export class ClaudeProfileManager {
     this.save();
 
     const isEncrypted = profile.oauthToken.startsWith('enc:');
-    console.warn('[ClaudeProfileManager] Set OAuth token for profile:', profile.name, {
+    console.warn('[IFlowProfileManager] Set OAuth token for profile:', profile.name, {
       email: email || '(not captured)',
       encrypted: isEncrypted,
       tokenLength: token.length
@@ -377,14 +377,14 @@ export class ClaudeProfileManager {
       const decryptedToken = decryptToken(profile.oauthToken);
       if (decryptedToken) {
         env.CLAUDE_CODE_OAUTH_TOKEN = decryptedToken;
-        console.warn('[ClaudeProfileManager] Using OAuth token for profile:', profile.name);
+        console.warn('[IFlowProfileManager] Using OAuth token for profile:', profile.name);
       } else {
-        console.warn('[ClaudeProfileManager] Failed to decrypt token for profile:', profile.name);
+        console.warn('[IFlowProfileManager] Failed to decrypt token for profile:', profile.name);
       }
     } else if (profile?.configDir && !profile.isDefault) {
       // Fallback to configDir for backward compatibility
       env.CLAUDE_CONFIG_DIR = profile.configDir;
-      console.warn('[ClaudeProfileManager] Using configDir for profile:', profile.name);
+      console.warn('[IFlowProfileManager] Using configDir for profile:', profile.name);
     }
 
     return env;
@@ -393,7 +393,7 @@ export class ClaudeProfileManager {
   /**
    * Update usage data for a profile (parsed from /usage output)
    */
-  updateProfileUsage(profileId: string, usageOutput: string): ClaudeUsageData | null {
+  updateProfileUsage(profileId: string, usageOutput: string): IFlowUsageData | null {
     const profile = this.getProfile(profileId);
     if (!profile) {
       return null;
@@ -403,14 +403,14 @@ export class ClaudeProfileManager {
     profile.usage = usage;
     this.save();
 
-    console.warn('[ClaudeProfileManager] Updated usage for', profile.name, ':', usage);
+    console.warn('[IFlowProfileManager] Updated usage for', profile.name, ':', usage);
     return usage;
   }
 
   /**
    * Record a rate limit event for a profile
    */
-  recordRateLimitEvent(profileId: string, resetTimeStr: string): ClaudeRateLimitEvent {
+  recordRateLimitEvent(profileId: string, resetTimeStr: string): IFlowRateLimitEvent {
     const profile = this.getProfile(profileId);
     if (!profile) {
       throw new Error('Profile not found');
@@ -419,7 +419,7 @@ export class ClaudeProfileManager {
     const event = recordRateLimitEventImpl(profile, resetTimeStr);
     this.save();
 
-    console.warn('[ClaudeProfileManager] Recorded rate limit event for', profile.name, ':', event);
+    console.warn('[IFlowProfileManager] Recorded rate limit event for', profile.name, ':', event);
     return event;
   }
 
@@ -438,7 +438,7 @@ export class ClaudeProfileManager {
    * Get the best profile to switch to based on usage and rate limit status
    * Returns null if no good alternative is available
    */
-  getBestAvailableProfile(excludeProfileId?: string): ClaudeProfile | null {
+  getBestAvailableProfile(excludeProfileId?: string): IFlowProfile | null {
     const settings = this.getAutoSwitchSettings();
     return getBestAvailableProfile(this.data.profiles, settings, excludeProfileId);
   }
@@ -446,7 +446,7 @@ export class ClaudeProfileManager {
   /**
    * Determine if we should proactively switch profiles based on current usage
    */
-  shouldProactivelySwitch(profileId: string): { shouldSwitch: boolean; reason?: string; suggestedProfile?: ClaudeProfile } {
+  shouldProactivelySwitch(profileId: string): { shouldSwitch: boolean; reason?: string; suggestedProfile?: IFlowProfile } {
     const profile = this.getProfile(profileId);
     if (!profile) {
       return { shouldSwitch: false };
@@ -474,7 +474,7 @@ export class ClaudeProfileManager {
    * Check if a profile has valid authentication
    * (checks if the config directory has credential files)
    */
-  isProfileAuthenticated(profile: ClaudeProfile): boolean {
+  isProfileAuthenticated(profile: IFlowProfile): boolean {
     return isProfileAuthenticatedImpl(profile);
   }
 
@@ -544,22 +544,22 @@ export class ClaudeProfileManager {
   /**
    * Get profiles sorted by availability (best first)
    */
-  getProfilesSortedByAvailability(): ClaudeProfile[] {
+  getProfilesSortedByAvailability(): IFlowProfile[] {
     return getProfilesSortedByAvailabilityImpl(this.data.profiles);
   }
 }
 
 // Singleton instance and initialization promise
-let profileManager: ClaudeProfileManager | null = null;
-let initPromise: Promise<ClaudeProfileManager> | null = null;
+let profileManager: IFlowProfileManager | null = null;
+let initPromise: Promise<IFlowProfileManager> | null = null;
 
 /**
  * Get the singleton Claude profile manager instance
- * Note: For async contexts, prefer initializeClaudeProfileManager() to ensure initialization
+ * Note: For async contexts, prefer initializeIFlowProfileManager() to ensure initialization
  */
-export function getClaudeProfileManager(): ClaudeProfileManager {
+export function getIFlowProfileManager(): IFlowProfileManager {
   if (!profileManager) {
-    profileManager = new ClaudeProfileManager();
+    profileManager = new IFlowProfileManager();
   }
   return profileManager;
 }
@@ -570,9 +570,9 @@ export function getClaudeProfileManager(): ClaudeProfileManager {
  * Uses promise caching to prevent concurrent initialization.
  * The cached promise is reset on failure to allow retries after transient errors.
  */
-export async function initializeClaudeProfileManager(): Promise<ClaudeProfileManager> {
+export async function initializeIFlowProfileManager(): Promise<IFlowProfileManager> {
   if (!profileManager) {
-    profileManager = new ClaudeProfileManager();
+    profileManager = new IFlowProfileManager();
   }
 
   // If already initialized, return immediately

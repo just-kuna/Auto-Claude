@@ -9,7 +9,7 @@ import { AgentManager } from '../../agent';
 import { fileWatcher } from '../../file-watcher';
 import { findTaskAndProject } from './shared';
 import { checkGitStatus } from '../../project-initializer';
-import { initializeClaudeProfileManager, type ClaudeProfileManager } from '../../iflow-profile-manager';
+import { initializeIFlowProfileManager, type IFlowProfileManager } from '../../iflow-profile-manager';
 import {
   getPlanPath,
   persistPlanStatus,
@@ -81,11 +81,11 @@ function checkSubtasksCompletion(plan: Record<string, unknown> | null): {
  * @returns Success with profile manager, or failure with error message
  */
 async function ensureProfileManagerInitialized(): Promise<
-  | { success: true; profileManager: ClaudeProfileManager }
+  | { success: true; profileManager: IFlowProfileManager }
   | { success: false; error: string }
 > {
   try {
-    const profileManager = await initializeClaudeProfileManager();
+    const profileManager = await initializeIFlowProfileManager();
     return { success: true, profileManager };
   } catch (error) {
     console.error('[ensureProfileManagerInitialized] Failed to initialize:', error);

@@ -61,9 +61,9 @@ import type {
 import type {
   IFlowProfileSettings,
   IFlowProfile,
-  ClaudeAutoSwitchSettings,
+  IFlowAutoSwitchSettings,
   ClaudeAuthResult,
-  ClaudeUsageSnapshot
+  IFlowUsageSnapshot
 } from './agent';
 import type { AppSettings, SourceEnvConfig, SourceEnvCheckResult } from './settings';
 import type { AppUpdateInfo, AppUpdateProgress, AppUpdateAvailableEvent, AppUpdateDownloadedEvent } from './app-update';
@@ -259,11 +259,11 @@ export interface ElectronAPI {
   /** Set OAuth token for a profile (used when capturing from terminal) */
   setIFlowProfileToken: (profileId: string, token: string, email?: string) => Promise<IPCResult>;
   /** Get auto-switch settings */
-  getAutoSwitchSettings: () => Promise<IPCResult<ClaudeAutoSwitchSettings>>;
+  getAutoSwitchSettings: () => Promise<IPCResult<IFlowAutoSwitchSettings>>;
   /** Update auto-switch settings */
-  updateAutoSwitchSettings: (settings: Partial<ClaudeAutoSwitchSettings>) => Promise<IPCResult>;
+  updateAutoSwitchSettings: (settings: Partial<IFlowAutoSwitchSettings>) => Promise<IPCResult>;
   /** Request usage fetch from a terminal (sends /usage command) */
-  fetchClaudeUsage: (terminalId: string) => Promise<IPCResult>;
+  fetchIFlowUsage: (terminalId: string) => Promise<IPCResult>;
   /** Get the best available profile (for manual switching) */
   getBestAvailableProfile: (excludeProfileId?: string) => Promise<IPCResult<IFlowProfile | null>>;
   /** Listen for SDK/CLI rate limit events (non-terminal) */
@@ -273,15 +273,15 @@ export interface ElectronAPI {
 
   // Usage Monitoring (Proactive Account Switching)
   /** Request current usage snapshot */
-  requestUsageUpdate: () => Promise<IPCResult<ClaudeUsageSnapshot | null>>;
+  requestUsageUpdate: () => Promise<IPCResult<IFlowUsageSnapshot | null>>;
   /** Listen for usage data updates */
-  onUsageUpdated: (callback: (usage: ClaudeUsageSnapshot) => void) => () => void;
+  onUsageUpdated: (callback: (usage: IFlowUsageSnapshot) => void) => () => void;
   /** Listen for proactive swap notifications */
   onProactiveSwapNotification: (callback: (notification: {
     fromProfile: { id: string; name: string };
     toProfile: { id: string; name: string };
     reason: string;
-    usageSnapshot: ClaudeUsageSnapshot;
+    usageSnapshot: IFlowUsageSnapshot;
   }) => void) => () => void;
 
   // App settings

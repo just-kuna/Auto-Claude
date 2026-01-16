@@ -9,7 +9,7 @@ import { promises as fsPromises } from 'fs';
 import * as path from 'path';
 import * as crypto from 'crypto';
 import { IPC_CHANNELS } from '../../shared/constants';
-import { getClaudeProfileManager, initializeClaudeProfileManager } from '../iflow-profile-manager';
+import { getIFlowProfileManager, initializeIFlowProfileManager } from '../iflow-profile-manager';
 import * as OutputParser from './output-parser';
 import * as SessionHandler from './session-handler';
 import { debugLog, debugError } from '../../shared/utils/debug-logger';
@@ -185,7 +185,7 @@ export function handleRateLimit(
   lastNotifiedRateLimitReset.set(terminal.id, resetTime);
   console.warn('[ClaudeIntegration] Rate limit detected, reset:', resetTime);
 
-  const profileManager = getClaudeProfileManager();
+  const profileManager = getIFlowProfileManager();
   const currentProfileId = terminal.claudeProfileId || 'default';
 
   try {
@@ -243,7 +243,7 @@ export function handleOAuthToken(
   if (profileIdMatch) {
     // Save to specific profile (profile login terminal)
     const profileId = profileIdMatch[1];
-    const profileManager = getClaudeProfileManager();
+    const profileManager = getIFlowProfileManager();
     const success = profileManager.setProfileToken(profileId, token, email || undefined);
 
     if (success) {
@@ -265,7 +265,7 @@ export function handleOAuthToken(
   } else {
     // No profile-specific terminal, save to active profile (GitHub OAuth flow, etc.)
     console.warn('[ClaudeIntegration] OAuth token detected in non-profile terminal, saving to active profile');
-    const profileManager = getClaudeProfileManager();
+    const profileManager = getIFlowProfileManager();
     const activeProfile = profileManager.getActiveProfile();
 
     // Defensive null check for active profile
@@ -401,7 +401,7 @@ export function invokeClaude(
   const startTime = Date.now();
   const projectPath = cwd || terminal.projectPath || terminal.cwd;
 
-  const profileManager = getClaudeProfileManager();
+  const profileManager = getIFlowProfileManager();
   const activeProfile = profileId
     ? profileManager.getProfile(profileId)
     : profileManager.getActiveProfile();
@@ -578,7 +578,7 @@ export async function invokeClaudeAsync(
   const projectPath = cwd || terminal.projectPath || terminal.cwd;
 
   // Ensure profile manager is initialized (async, yields to event loop)
-  const profileManager = await initializeClaudeProfileManager();
+  const profileManager = await initializeIFlowProfileManager();
   const activeProfile = profileId
     ? profileManager.getProfile(profileId)
     : profileManager.getActiveProfile();
@@ -813,7 +813,7 @@ async function waitForClaudeExit(
 /**
  * Switch terminal to a different Claude profile
  */
-export async function switchClaudeProfile(
+export async function switchIFlowProfile(
   terminal: TerminalProcess,
   profileId: string,
   getWindow: WindowGetter,
@@ -821,13 +821,13 @@ export async function switchClaudeProfile(
   clearRateLimitCallback: (terminalId: string) => void
 ): Promise<{ success: boolean; error?: string }> {
   // Always-on tracing
-  console.warn('[ClaudeIntegration:switchClaudeProfile] Called for terminal:', terminal.id, '| profileId:', profileId);
-  console.warn('[ClaudeIntegration:switchClaudeProfile] Terminal state: isClaudeMode=', terminal.isClaudeMode);
+  console.warn('[ClaudeIntegration:switchIFlowProfile] Called for terminal:', terminal.id, '| profileId:', profileId);
+  console.warn('[ClaudeIntegration:switchIFlowProfile] Terminal state: isClaudeMode=', terminal.isClaudeMode);
 
-  debugLog('[ClaudeIntegration:switchClaudeProfile] ========== SWITCH PROFILE START ==========');
-  debugLog('[ClaudeIntegration:switchClaudeProfile] Terminal ID:', terminal.id);
-  debugLog('[ClaudeIntegration:switchClaudeProfile] Target profile ID:', profileId);
-  debugLog('[ClaudeIntegration:switchClaudeProfile] Terminal state:', {
+  debugLog('[ClaudeIntegration:switchIFlowProfile] ========== SWITCH PROFILE START ==========');
+  debugLog('[ClaudeIntegration:switchIFlowProfile] Terminal ID:', terminal.id);
+  debugLog('[ClaudeIntegration:switchIFlowProfile] Target profile ID:', profileId);
+  debugLog('[ClaudeIntegration:switchIFlowProfile] Terminal state:', {
     isClaudeMode: terminal.isClaudeMode,
     currentProfileId: terminal.claudeProfileId,
     claudeSessionId: terminal.claudeSessionId,
@@ -836,11 +836,11 @@ export async function switchClaudeProfile(
   });
 
   // Ensure profile manager is initialized (async, yields to event loop)
-  const profileManager = await initializeClaudeProfileManager();
+  const profileManager = await initializeIFlowProfileManager();
   const profile = profileManager.getProfile(profileId);
 
-  console.warn('[ClaudeIntegration:switchClaudeProfile] Profile found:', profile?.name || 'NOT FOUND');
-  debugLog('[ClaudeIntegration:switchClaudeProfile] Target profile:', profile ? {
+  console.warn('[ClaudeIntegration:switchIFlowProfile] Profile found:', profile?.name || 'NOT FOUND');
+  debugLog('[ClaudeIntegration:switchIFlowProfile] Target profile:', profile ? {
     id: profile.id,
     name: profile.name,
     hasOAuthToken: !!profile.oauthToken,
@@ -848,58 +848,58 @@ export async function switchClaudeProfile(
   } : 'NOT FOUND');
 
   if (!profile) {
-    console.error('[ClaudeIntegration:switchClaudeProfile] Profile not found, aborting');
-    debugError('[ClaudeIntegration:switchClaudeProfile] Profile not found, aborting');
+    console.error('[ClaudeIntegration:switchIFlowProfile] Profile not found, aborting');
+    debugError('[ClaudeIntegration:switchIFlowProfile] Profile not found, aborting');
     return { success: false, error: 'Profile not found' };
   }
 
-  console.warn('[ClaudeIntegration:switchClaudeProfile] Switching to profile:', profile.name);
-  debugLog('[ClaudeIntegration:switchClaudeProfile] Switching to Claude profile:', profile.name);
+  console.warn('[ClaudeIntegration:switchIFlowProfile] Switching to profile:', profile.name);
+  debugLog('[ClaudeIntegration:switchIFlowProfile] Switching to Claude profile:', profile.name);
 
   if (terminal.isClaudeMode) {
-    console.warn('[ClaudeIntegration:switchClaudeProfile] Sending exit commands (Ctrl+C, /exit)');
-    debugLog('[ClaudeIntegration:switchClaudeProfile] Terminal is in Claude mode, sending exit commands');
+    console.warn('[ClaudeIntegration:switchIFlowProfile] Sending exit commands (Ctrl+C, /exit)');
+    debugLog('[ClaudeIntegration:switchIFlowProfile] Terminal is in Claude mode, sending exit commands');
 
     // Send Ctrl+C to interrupt any ongoing operation
-    debugLog('[ClaudeIntegration:switchClaudeProfile] Sending Ctrl+C (\\x03)');
+    debugLog('[ClaudeIntegration:switchIFlowProfile] Sending Ctrl+C (\\x03)');
     terminal.pty.write('\x03');
 
     // Wait briefly for Ctrl+C to take effect before sending /exit
     await new Promise(resolve => setTimeout(resolve, 100));
 
     // Send /exit command
-    debugLog('[ClaudeIntegration:switchClaudeProfile] Sending /exit command');
+    debugLog('[ClaudeIntegration:switchIFlowProfile] Sending /exit command');
     terminal.pty.write('/exit\r');
 
     // Wait for Claude to actually exit by monitoring for shell prompt
     const exitResult = await waitForClaudeExit(terminal, { timeout: 5000, pollInterval: 100 });
 
     if (exitResult.timedOut) {
-      console.warn('[ClaudeIntegration:switchClaudeProfile] Timed out waiting for Claude to exit, proceeding with caution');
-      debugLog('[ClaudeIntegration:switchClaudeProfile] Exit timeout - terminal may be in inconsistent state');
+      console.warn('[ClaudeIntegration:switchIFlowProfile] Timed out waiting for Claude to exit, proceeding with caution');
+      debugLog('[ClaudeIntegration:switchIFlowProfile] Exit timeout - terminal may be in inconsistent state');
 
       // Even on timeout, we'll try to proceed but log the warning
       // The alternative would be to abort, but that could leave users stuck
       // If this becomes a problem, we could add retry logic or abort option
     } else if (!exitResult.success) {
-      console.error('[ClaudeIntegration:switchClaudeProfile] Failed to exit Claude:', exitResult.error);
-      debugError('[ClaudeIntegration:switchClaudeProfile] Exit failed:', exitResult.error);
+      console.error('[ClaudeIntegration:switchIFlowProfile] Failed to exit Claude:', exitResult.error);
+      debugError('[ClaudeIntegration:switchIFlowProfile] Exit failed:', exitResult.error);
       // Continue anyway - the /exit command was sent
     } else {
-      console.warn('[ClaudeIntegration:switchClaudeProfile] Claude exited successfully');
-      debugLog('[ClaudeIntegration:switchClaudeProfile] Claude exited, ready to switch profile');
+      console.warn('[ClaudeIntegration:switchIFlowProfile] Claude exited successfully');
+      debugLog('[ClaudeIntegration:switchIFlowProfile] Claude exited, ready to switch profile');
     }
   } else {
-    console.warn('[ClaudeIntegration:switchClaudeProfile] NOT in Claude mode, skipping exit commands');
-    debugLog('[ClaudeIntegration:switchClaudeProfile] Terminal NOT in Claude mode, skipping exit commands');
+    console.warn('[ClaudeIntegration:switchIFlowProfile] NOT in Claude mode, skipping exit commands');
+    debugLog('[ClaudeIntegration:switchIFlowProfile] Terminal NOT in Claude mode, skipping exit commands');
   }
 
-  debugLog('[ClaudeIntegration:switchClaudeProfile] Clearing rate limit state for terminal');
+  debugLog('[ClaudeIntegration:switchIFlowProfile] Clearing rate limit state for terminal');
   clearRateLimitCallback(terminal.id);
 
   const projectPath = terminal.projectPath || terminal.cwd;
-  console.warn('[ClaudeIntegration:switchClaudeProfile] Invoking Claude with profile:', profileId, '| cwd:', projectPath, '| YOLO:', terminal.dangerouslySkipPermissions);
-  debugLog('[ClaudeIntegration:switchClaudeProfile] Invoking Claude with new profile:', {
+  console.warn('[ClaudeIntegration:switchIFlowProfile] Invoking Claude with profile:', profileId, '| cwd:', projectPath, '| YOLO:', terminal.dangerouslySkipPermissions);
+  debugLog('[ClaudeIntegration:switchIFlowProfile] Invoking Claude with new profile:', {
     terminalId: terminal.id,
     projectPath,
     profileId,
@@ -908,10 +908,10 @@ export async function switchClaudeProfile(
   // Pass the stored dangerouslySkipPermissions value to preserve YOLO mode across profile switches
   await invokeClaudeCallback(terminal.id, projectPath, profileId, terminal.dangerouslySkipPermissions);
 
-  debugLog('[ClaudeIntegration:switchClaudeProfile] Setting active profile in profile manager');
+  debugLog('[ClaudeIntegration:switchIFlowProfile] Setting active profile in profile manager');
   profileManager.setActiveProfile(profileId);
 
-  console.warn('[ClaudeIntegration:switchClaudeProfile] COMPLETE');
-  debugLog('[ClaudeIntegration:switchClaudeProfile] ========== SWITCH PROFILE COMPLETE ==========');
+  console.warn('[ClaudeIntegration:switchIFlowProfile] COMPLETE');
+  debugLog('[ClaudeIntegration:switchIFlowProfile] ========== SWITCH PROFILE COMPLETE ==========');
   return { success: true };
 }

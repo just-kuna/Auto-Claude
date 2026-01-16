@@ -3,7 +3,7 @@
  */
 
 export const claudeProfileMock = {
-  getClaudeProfiles: async () => ({
+  getIFlowProfiles: async () => ({
     success: true,
     data: {
       profiles: [],
@@ -11,7 +11,7 @@ export const claudeProfileMock = {
     }
   }),
 
-  saveClaudeProfile: async (profile: { id: string; name: string; oauthToken?: string; email?: string; isDefault?: boolean; createdAt?: Date }) => ({
+  saveIFlowProfile: async (profile: { id: string; name: string; oauthToken?: string; email?: string; isDefault?: boolean; createdAt?: Date }) => ({
     success: true,
     data: {
       id: profile.id,
@@ -23,17 +23,17 @@ export const claudeProfileMock = {
     }
   }),
 
-  deleteClaudeProfile: async () => ({ success: true }),
+  deleteIFlowProfile: async () => ({ success: true }),
 
-  renameClaudeProfile: async () => ({ success: true }),
+  renameIFlowProfile: async () => ({ success: true }),
 
-  setActiveClaudeProfile: async () => ({ success: true }),
+  setActiveIFlowProfile: async () => ({ success: true }),
 
-  switchClaudeProfile: async () => ({ success: true }),
+  switchIFlowProfile: async () => ({ success: true }),
 
-  initializeClaudeProfile: async () => ({ success: true }),
+  initializeIFlowProfile: async () => ({ success: true }),
 
-  setClaudeProfileToken: async () => ({ success: true }),
+  setIFlowProfileToken: async () => ({ success: true }),
 
   getAutoSwitchSettings: async () => ({
     success: true,
@@ -49,7 +49,7 @@ export const claudeProfileMock = {
 
   updateAutoSwitchSettings: async () => ({ success: true }),
 
-  fetchClaudeUsage: async () => ({ success: true }),
+  fetchIFlowUsage: async () => ({ success: true }),
 
   getBestAvailableProfile: async () => ({
     success: true,

@@ -10,7 +10,7 @@ import { buildCdCommand } from '../../../shared/utils/shell-escape';
 const escapeForRegex = (str: string): string => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 const mockGetClaudeCliInvocation = vi.fn();
-const mockGetClaudeProfileManager = vi.fn();
+const mockGetIFlowProfileManager = vi.fn();
 const mockPersistSession = vi.fn();
 const mockReleaseSessionId = vi.fn();
 
@@ -50,7 +50,7 @@ vi.mock('../../claude-cli-utils', () => ({
 }));
 
 vi.mock('../../iflow-profile-manager', () => ({
-  getClaudeProfileManager: mockGetClaudeProfileManager,
+  getIFlowProfileManager: mockGetIFlowProfileManager,
 }));
 
 vi.mock('fs', async (importOriginal) => {
@@ -77,7 +77,7 @@ vi.mock('os', async (importOriginal) => {
 describe('claude-integration-handler', () => {
   beforeEach(() => {
     mockGetClaudeCliInvocation.mockClear();
-    mockGetClaudeProfileManager.mockClear();
+    mockGetIFlowProfileManager.mockClear();
     mockPersistSession.mockClear();
     mockReleaseSessionId.mockClear();
     vi.mocked(writeFileSync).mockClear();
@@ -94,7 +94,7 @@ describe('claude-integration-handler', () => {
       getProfileToken: vi.fn(() => null),
       markProfileUsed: vi.fn(),
     };
-    mockGetClaudeProfileManager.mockReturnValue(profileManager);
+    mockGetIFlowProfileManager.mockReturnValue(profileManager);
 
     const terminal = createMockTerminal();
 
@@ -126,7 +126,7 @@ describe('claude-integration-handler', () => {
         getProfileToken: vi.fn(() => null),
         markProfileUsed: vi.fn(),
       };
-      mockGetClaudeProfileManager.mockReturnValue(profileManager);
+      mockGetIFlowProfileManager.mockReturnValue(profileManager);
 
       const terminal = createMockTerminal();
 
@@ -153,7 +153,7 @@ describe('claude-integration-handler', () => {
       getProfileToken: vi.fn(() => null),
       markProfileUsed: vi.fn(),
     };
-    mockGetClaudeProfileManager.mockReturnValue(profileManager);
+    mockGetIFlowProfileManager.mockReturnValue(profileManager);
 
     const terminal = createMockTerminal({ id: 'term-err' });
 
@@ -195,7 +195,7 @@ describe('claude-integration-handler', () => {
       getProfileToken: vi.fn(() => 'token-value'),
       markProfileUsed: vi.fn(),
     };
-    mockGetClaudeProfileManager.mockReturnValue(profileManager);
+    mockGetIFlowProfileManager.mockReturnValue(profileManager);
     vi.mocked(writeFileSync).mockImplementationOnce(() => {
       throw new Error('disk full');
     });
@@ -225,7 +225,7 @@ describe('claude-integration-handler', () => {
       command,
       env: { PATH: '/opt/claude/bin:/usr/bin' },
     });
-    mockGetClaudeProfileManager.mockReturnValue(profileManager);
+    mockGetIFlowProfileManager.mockReturnValue(profileManager);
     const nowSpy = vi.spyOn(Date, 'now').mockReturnValue(1234);
 
     const terminal = createMockTerminal({ id: 'term-3' });
@@ -268,7 +268,7 @@ describe('claude-integration-handler', () => {
       command,
       env: { PATH: '/opt/claude/bin:/usr/bin' },
     });
-    mockGetClaudeProfileManager.mockReturnValue(profileManager);
+    mockGetIFlowProfileManager.mockReturnValue(profileManager);
     const nowSpy = vi.spyOn(Date, 'now').mockReturnValue(5678);
 
     const terminal = createMockTerminal({ id: 'term-both' });
@@ -306,7 +306,7 @@ describe('claude-integration-handler', () => {
       command,
       env: { PATH: '/opt/claude/bin:/usr/bin' },
     });
-    mockGetClaudeProfileManager.mockReturnValue(profileManager);
+    mockGetIFlowProfileManager.mockReturnValue(profileManager);
 
     const terminal = createMockTerminal({ id: 'term-6' });
 
@@ -337,7 +337,7 @@ describe('claude-integration-handler', () => {
       command,
       env: { PATH: '/opt/claude/bin:/usr/bin' },
     });
-    mockGetClaudeProfileManager.mockReturnValue(profileManager);
+    mockGetIFlowProfileManager.mockReturnValue(profileManager);
 
     const terminal = createMockTerminal({ id: 'term-4' });
 
@@ -370,7 +370,7 @@ describe('claude-integration-handler', () => {
       command,
       env: { PATH: '/opt/claude/bin:/usr/bin' },
     });
-    mockGetClaudeProfileManager.mockReturnValue(profileManager);
+    mockGetIFlowProfileManager.mockReturnValue(profileManager);
 
     const terminal = createMockTerminal({ id: 'term-5' });
 

@@ -3,7 +3,7 @@
  * Handles parsing of Claude /usage command output and reset time calculations
  */
 
-import type { ClaudeUsageData } from '../../shared/types';
+import type { IFlowUsageData } from '../../shared/types';
 
 /**
  * Regex to parse /usage command output
@@ -85,9 +85,9 @@ export function classifyRateLimitType(resetTimeStr: string): 'session' | 'weekly
  * "Current week (all models) 79% used Resets Nov 1, 10:59am"
  * "Current week (Opus) 0% used"
  */
-export function parseUsageOutput(usageOutput: string): ClaudeUsageData {
+export function parseUsageOutput(usageOutput: string): IFlowUsageData {
   const sections = usageOutput.split(/Current\s+/i).filter(Boolean);
-  const usage: ClaudeUsageData = {
+  const usage: IFlowUsageData = {
     sessionUsagePercent: 0,
     sessionResetTime: '',
     weeklyUsagePercent: 0,

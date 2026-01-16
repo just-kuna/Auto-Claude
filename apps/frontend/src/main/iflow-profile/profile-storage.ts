@@ -5,14 +5,14 @@
 
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { readFile } from 'fs/promises';
-import type { ClaudeProfile, ClaudeAutoSwitchSettings } from '../../shared/types';
+import type { IFlowProfile, IFlowAutoSwitchSettings } from '../../shared/types';
 
 export const STORE_VERSION = 3;  // Bumped for encrypted token storage
 
 /**
  * Default auto-switch settings
  */
-export const DEFAULT_AUTO_SWITCH_SETTINGS: ClaudeAutoSwitchSettings = {
+export const DEFAULT_AUTO_SWITCH_SETTINGS: IFlowAutoSwitchSettings = {
   enabled: false,
   proactiveSwapEnabled: false,  // Proactive monitoring disabled by default
   sessionThreshold: 95,  // Consider switching at 95% session usage
@@ -26,9 +26,9 @@ export const DEFAULT_AUTO_SWITCH_SETTINGS: ClaudeAutoSwitchSettings = {
  */
 export interface ProfileStoreData {
   version: number;
-  profiles: ClaudeProfile[];
+  profiles: IFlowProfile[];
   activeProfileId: string;
-  autoSwitch?: ClaudeAutoSwitchSettings;
+  autoSwitch?: IFlowAutoSwitchSettings;
 }
 
 /**
@@ -46,8 +46,8 @@ function parseAndMigrateProfileData(data: Record<string, unknown>): ProfileStore
 
   if (data.version === STORE_VERSION) {
     // Parse dates
-    const profiles = data.profiles as ClaudeProfile[];
-    data.profiles = profiles.map((p: ClaudeProfile) => ({
+    const profiles = data.profiles as IFlowProfile[];
+    data.profiles = profiles.map((p: IFlowProfile) => ({
       ...p,
       createdAt: new Date(p.createdAt),
       lastUsedAt: p.lastUsedAt ? new Date(p.lastUsedAt) : undefined,

@@ -3,17 +3,17 @@
  * Handles rate limit event recording and status checking
  */
 
-import type { ClaudeProfile, ClaudeRateLimitEvent } from '../../shared/types';
+import type { IFlowProfile, IFlowRateLimitEvent } from '../../shared/types';
 import { parseResetTime, classifyRateLimitType } from './usage-parser';
 
 /**
  * Record a rate limit event for a profile
  */
 export function recordRateLimitEvent(
-  profile: ClaudeProfile,
+  profile: IFlowProfile,
   resetTimeStr: string
-): ClaudeRateLimitEvent {
-  const event: ClaudeRateLimitEvent = {
+): IFlowRateLimitEvent {
+  const event: IFlowRateLimitEvent = {
     type: classifyRateLimitType(resetTimeStr),
     hitAt: new Date(),
     resetAt: parseResetTime(resetTimeStr),
@@ -33,7 +33,7 @@ export function recordRateLimitEvent(
  * Check if a profile is currently rate-limited
  */
 export function isProfileRateLimited(
-  profile: ClaudeProfile
+  profile: IFlowProfile
 ): { limited: boolean; type?: 'session' | 'weekly'; resetAt?: Date } {
   if (!profile || !profile.rateLimitEvents?.length) {
     return { limited: false };
@@ -57,6 +57,6 @@ export function isProfileRateLimited(
 /**
  * Clear rate limit events for a profile (e.g., when they've reset)
  */
-export function clearRateLimitEvents(profile: ClaudeProfile): void {
+export function clearRateLimitEvents(profile: IFlowProfile): void {
   profile.rateLimitEvents = [];
 }

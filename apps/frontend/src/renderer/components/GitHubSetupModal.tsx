@@ -120,7 +120,7 @@ export function GitHubSetupModal({
           const hasGitHubAuth = ghTokenResult.success && ghTokenResult.data?.token;
 
           // Check for existing Claude authentication
-          const profilesResult = await window.electronAPI.getClaudeProfiles();
+          const profilesResult = await window.electronAPI.getIFlowProfiles();
           let hasClaudeAuth = false;
           if (profilesResult.success && profilesResult.data) {
             const activeProfile = profilesResult.data.profiles.find(
@@ -247,7 +247,7 @@ export function GitHubSetupModal({
 
     // Check if Claude is already authenticated before showing auth step
     try {
-      const profilesResult = await window.electronAPI.getClaudeProfiles();
+      const profilesResult = await window.electronAPI.getIFlowProfiles();
       if (profilesResult.success && profilesResult.data) {
         const activeProfile = profilesResult.data.profiles.find(
           (p) => p.id === profilesResult.data!.activeProfileId

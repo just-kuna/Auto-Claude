@@ -31,7 +31,7 @@ import {
   TooltipTrigger
 } from './ui/tooltip';
 import { cn } from '../lib/utils';
-import type { ClaudeProfile } from '../../shared/types';
+import type { IFlowProfile } from '../../shared/types';
 
 interface EnvConfigModalProps {
   open: boolean;
@@ -60,7 +60,7 @@ export function EnvConfigModal({
   const [success, setSuccess] = useState(false);
   const [sourcePath, setSourcePath] = useState<string | null>(null);
   const [hasExistingToken, setHasExistingToken] = useState(false);
-  const [claudeProfiles, setClaudeProfiles] = useState<Array<{
+  const [claudeProfiles, setIFlowProfiles] = useState<Array<{
     id: string;
     name: string;
     oauthToken?: string;
@@ -84,7 +84,7 @@ export function EnvConfigModal({
         // Load both token status and Claude profiles in parallel
         const [tokenResult, profilesResult] = await Promise.all([
           window.electronAPI.checkSourceToken(),
-          window.electronAPI.getClaudeProfiles()
+          window.electronAPI.getIFlowProfiles()
         ]);
 
         // Handle token status
@@ -103,9 +103,9 @@ export function EnvConfigModal({
         // Handle Claude profiles
         if (profilesResult.success && profilesResult.data) {
           const authenticatedProfiles = profilesResult.data.profiles.filter(
-            (p: ClaudeProfile) => p.oauthToken || (p.isDefault && p.configDir)
+            (p: IFlowProfile) => p.oauthToken || (p.isDefault && p.configDir)
           );
-          setClaudeProfiles(authenticatedProfiles);
+          setIFlowProfiles(authenticatedProfiles);
 
           // Auto-select first authenticated profile
           if (authenticatedProfiles.length > 0 && !selectedProfileId) {

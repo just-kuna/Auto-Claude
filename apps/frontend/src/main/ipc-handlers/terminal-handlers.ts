@@ -1,8 +1,8 @@
 import { ipcMain } from 'electron';
 import type { BrowserWindow } from 'electron';
 import { IPC_CHANNELS } from '../../shared/constants';
-import type { IPCResult, TerminalCreateOptions, ClaudeProfile, ClaudeProfileSettings, ClaudeUsageSnapshot } from '../../shared/types';
-import { getClaudeProfileManager } from '../iflow-profile-manager';
+import type { IPCResult, TerminalCreateOptions, IFlowProfile, IFlowProfileSettings, IFlowUsageSnapshot } from '../../shared/types';
+import { getIFlowProfileManager } from '../iflow-profile-manager';
 import { getUsageMonitor } from '../claude-profile/usage-monitor';
 import { TerminalManager } from '../terminal-manager';
 import { projectStore } from '../project-store';
@@ -109,9 +109,9 @@ export function registerTerminalHandlers(
   // Claude profile management (multi-account support)
   ipcMain.handle(
     IPC_CHANNELS.CLAUDE_PROFILES_GET,
-    async (): Promise<IPCResult<ClaudeProfileSettings>> => {
+    async (): Promise<IPCResult<IFlowProfileSettings>> => {
       try {
-        const profileManager = getClaudeProfileManager();
+        const profileManager = getIFlowProfileManager();
         const settings = profileManager.getSettings();
         return { success: true, data: settings };
       } catch (error) {
@@ -125,9 +125,9 @@ export function registerTerminalHandlers(
 
   ipcMain.handle(
     IPC_CHANNELS.CLAUDE_PROFILE_SAVE,
-    async (_, profile: ClaudeProfile): Promise<IPCResult<ClaudeProfile>> => {
+    async (_, profile: IFlowProfile): Promise<IPCResult<IFlowProfile>> => {
       try {
-        const profileManager = getClaudeProfileManager();
+        const profileManager = getIFlowProfileManager();
 
         // If this is a new profile without an ID, generate one
         if (!profile.id) {
@@ -157,7 +157,7 @@ export function registerTerminalHandlers(
     IPC_CHANNELS.CLAUDE_PROFILE_DELETE,
     async (_, profileId: string): Promise<IPCResult> => {
       try {
-        const profileManager = getClaudeProfileManager();
+        const profileManager = getIFlowProfileManager();
         const success = profileManager.deleteProfile(profileId);
         if (!success) {
           return { success: false, error: 'Cannot delete default or last profile' };
@@ -176,7 +176,7 @@ export function registerTerminalHandlers(
     IPC_CHANNELS.CLAUDE_PROFILE_RENAME,
     async (_, profileId: string, newName: string): Promise<IPCResult> => {
       try {
-        const profileManager = getClaudeProfileManager();
+        const profileManager = getIFlowProfileManager();
         const success = profileManager.renameProfile(profileId, newName);
         if (!success) {
           return { success: false, error: 'Profile not found or invalid name' };
@@ -198,7 +198,7 @@ export function registerTerminalHandlers(
       debugLog('[terminal-handlers:CLAUDE_PROFILE_SET_ACTIVE] Requested profile ID:', profileId);
 
       try {
-        const profileManager = getClaudeProfileManager();
+        const profileManager = getIFlowProfileManager();
         const previousProfile = profileManager.getActiveProfile();
         const previousProfileId = previousProfile.id;
         const newProfile = profileManager.getProfile(profileId);
@@ -252,7 +252,7 @@ export function registerTerminalHandlers(
               terminalsInClaudeMode.push(terminalId);
               debugLog('[terminal-handlers:CLAUDE_PROFILE_SET_ACTIVE] Queuing terminal for profile switch:', terminalId);
               switchPromises.push(
-                terminalManager.switchClaudeProfile(terminalId, profileId)
+                terminalManager.switchIFlowProfile(terminalId, profileId)
                   .then(() => {
                     debugLog('[terminal-handlers:CLAUDE_PROFILE_SET_ACTIVE] Terminal profile switch SUCCESS:', terminalId);
                   })
@@ -308,7 +308,7 @@ export function registerTerminalHandlers(
     IPC_CHANNELS.CLAUDE_PROFILE_SWITCH,
     async (_, terminalId: string, profileId: string): Promise<IPCResult> => {
       try {
-        const result = await terminalManager.switchClaudeProfile(terminalId, profileId);
+        const result = await terminalManager.switchIFlowProfile(terminalId, profileId);
         return result;
       } catch (error) {
         return {
@@ -325,7 +325,7 @@ export function registerTerminalHandlers(
       debugLog('[IPC:CLAUDE_PROFILE_INITIALIZE] Handler called for profileId:', profileId);
       try {
         debugLog('[IPC:CLAUDE_PROFILE_INITIALIZE] Getting profile manager...');
-        const profileManager = getClaudeProfileManager();
+        const profileManager = getIFlowProfileManager();
         debugLog('[IPC:CLAUDE_PROFILE_INITIALIZE] Getting profile...');
         const profile = profileManager.getProfile(profileId);
         if (!profile) {
@@ -447,7 +447,7 @@ export function registerTerminalHandlers(
     IPC_CHANNELS.CLAUDE_PROFILE_SET_TOKEN,
     async (_, profileId: string, token: string, email?: string): Promise<IPCResult> => {
       try {
-        const profileManager = getClaudeProfileManager();
+        const profileManager = getIFlowProfileManager();
         const success = profileManager.setProfileToken(profileId, token, email);
         if (!success) {
           return { success: false, error: 'Profile not found' };
@@ -466,9 +466,9 @@ export function registerTerminalHandlers(
   // Get auto-switch settings
   ipcMain.handle(
     IPC_CHANNELS.CLAUDE_PROFILE_AUTO_SWITCH_SETTINGS,
-    async (): Promise<IPCResult<import('../../shared/types').ClaudeAutoSwitchSettings>> => {
+    async (): Promise<IPCResult<import('../../shared/types').IFlowAutoSwitchSettings>> => {
       try {
-        const profileManager = getClaudeProfileManager();
+        const profileManager = getIFlowProfileManager();
         const settings = profileManager.getAutoSwitchSettings();
         return { success: true, data: settings };
       } catch (error) {
@@ -483,9 +483,9 @@ export function registerTerminalHandlers(
   // Update auto-switch settings
   ipcMain.handle(
     IPC_CHANNELS.CLAUDE_PROFILE_UPDATE_AUTO_SWITCH,
-    async (_, settings: Partial<import('../../shared/types').ClaudeAutoSwitchSettings>): Promise<IPCResult> => {
+    async (_, settings: Partial<import('../../shared/types').IFlowAutoSwitchSettings>): Promise<IPCResult> => {
       try {
-        const profileManager = getClaudeProfileManager();
+        const profileManager = getIFlowProfileManager();
         profileManager.updateAutoSwitchSettings(settings);
 
         // Restart usage monitor with new settings
@@ -523,9 +523,9 @@ export function registerTerminalHandlers(
   // Get best available profile
   ipcMain.handle(
     IPC_CHANNELS.CLAUDE_PROFILE_GET_BEST_PROFILE,
-    async (_, excludeProfileId?: string): Promise<IPCResult<ClaudeProfile | null>> => {
+    async (_, excludeProfileId?: string): Promise<IPCResult<IFlowProfile | null>> => {
       try {
-        const profileManager = getClaudeProfileManager();
+        const profileManager = getIFlowProfileManager();
         const bestProfile = profileManager.getBestAvailableProfile(excludeProfileId);
         return { success: true, data: bestProfile };
       } catch (error) {
@@ -542,7 +542,7 @@ export function registerTerminalHandlers(
     IPC_CHANNELS.CLAUDE_RETRY_WITH_PROFILE,
     async (_, request: import('../../shared/types').RetryWithProfileRequest): Promise<IPCResult> => {
       try {
-        const profileManager = getClaudeProfileManager();
+        const profileManager = getIFlowProfileManager();
 
         // Set the new active profile
         profileManager.setActiveProfile(request.profileId);
@@ -592,7 +592,7 @@ export function registerTerminalHandlers(
   // Request current usage snapshot
   ipcMain.handle(
     IPC_CHANNELS.USAGE_REQUEST,
-    async (): Promise<IPCResult<import('../../shared/types').ClaudeUsageSnapshot | null>> => {
+    async (): Promise<IPCResult<import('../../shared/types').IFlowUsageSnapshot | null>> => {
       try {
         const monitor = getUsageMonitor();
         const usage = monitor.getCurrentUsage();
@@ -760,7 +760,7 @@ export function initializeUsageMonitorForwarding(mainWindow: BrowserWindow): voi
   const monitor = getUsageMonitor();
 
   // Forward usage updates to renderer
-  monitor.on('usage-updated', (usage: ClaudeUsageSnapshot) => {
+  monitor.on('usage-updated', (usage: IFlowUsageSnapshot) => {
     mainWindow.webContents.send(IPC_CHANNELS.USAGE_UPDATED, usage);
   });
 

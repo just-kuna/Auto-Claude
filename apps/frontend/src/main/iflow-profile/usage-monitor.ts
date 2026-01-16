@@ -10,13 +10,13 @@
  */
 
 import { EventEmitter } from 'events';
-import { getClaudeProfileManager } from '../iflow-profile-manager';
-import { ClaudeUsageSnapshot } from '../../shared/types/agent';
+import { getIFlowProfileManager } from '../iflow-profile-manager';
+import { IFlowUsageSnapshot } from '../../shared/types/agent';
 
 export class UsageMonitor extends EventEmitter {
   private static instance: UsageMonitor;
   private intervalId: NodeJS.Timeout | null = null;
-  private currentUsage: ClaudeUsageSnapshot | null = null;
+  private currentUsage: IFlowUsageSnapshot | null = null;
   private isChecking = false;
   private useApiMethod = true; // Try API first, fall back to CLI if it fails
   
@@ -43,7 +43,7 @@ export class UsageMonitor extends EventEmitter {
    * Start monitoring usage at configured interval
    */
   start(): void {
-    const profileManager = getClaudeProfileManager();
+    const profileManager = getIFlowProfileManager();
     const settings = profileManager.getAutoSwitchSettings();
 
     if (!settings.enabled || !settings.proactiveSwapEnabled) {
@@ -82,7 +82,7 @@ export class UsageMonitor extends EventEmitter {
   /**
    * Get current usage snapshot (for UI indicator)
    */
-  getCurrentUsage(): ClaudeUsageSnapshot | null {
+  getCurrentUsage(): IFlowUsageSnapshot | null {
     return this.currentUsage;
   }
 
@@ -97,7 +97,7 @@ export class UsageMonitor extends EventEmitter {
     this.isChecking = true;
 
     try {
-      const profileManager = getClaudeProfileManager();
+      const profileManager = getIFlowProfileManager();
       const activeProfile = profileManager.getActiveProfile();
 
       if (!activeProfile) {
@@ -157,7 +157,7 @@ export class UsageMonitor extends EventEmitter {
     } catch (error) {
       // Check for auth failure (401/403) from fetchUsageViaAPI
       if ((error as any).statusCode === 401 || (error as any).statusCode === 403) {
-        const profileManager = getClaudeProfileManager();
+        const profileManager = getIFlowProfileManager();
         const activeProfile = profileManager.getActiveProfile();
         
         if (activeProfile) {
@@ -201,8 +201,8 @@ export class UsageMonitor extends EventEmitter {
   private async fetchUsage(
     profileId: string,
     oauthToken?: string
-  ): Promise<ClaudeUsageSnapshot | null> {
-    const profileManager = getClaudeProfileManager();
+  ): Promise<IFlowUsageSnapshot | null> {
+    const profileManager = getIFlowProfileManager();
     const profile = profileManager.getProfile(profileId);
     if (!profile) {
       return null;
@@ -233,7 +233,7 @@ export class UsageMonitor extends EventEmitter {
     oauthToken: string,
     profileId: string,
     profileName: string
-  ): Promise<ClaudeUsageSnapshot | null> {
+  ): Promise<IFlowUsageSnapshot | null> {
     try {
       const response = await fetch('https://api.anthropic.com/api/oauth/usage', {
         method: 'GET',
@@ -302,7 +302,7 @@ export class UsageMonitor extends EventEmitter {
   private async fetchUsageViaCLI(
     _profileId: string,
     _profileName: string
-  ): Promise<ClaudeUsageSnapshot | null> {
+  ): Promise<IFlowUsageSnapshot | null> {
     // CLI-based usage fetching is not implemented yet.
     // The API method should handle most cases. If we need CLI fallback,
     // we would need to spawn a Claude process with /usage command and parse the output.
@@ -346,7 +346,7 @@ export class UsageMonitor extends EventEmitter {
     limitType: 'session' | 'weekly',
     additionalExclusions: string[] = []
   ): Promise<void> {
-    const profileManager = getClaudeProfileManager();
+    const profileManager = getIFlowProfileManager();
     
     // Get all profiles to swap to, excluding current and any additional exclusions
     const allProfiles = profileManager.getProfilesSortedByAvailability();

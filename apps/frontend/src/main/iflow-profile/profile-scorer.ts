@@ -3,12 +3,12 @@
  * Handles profile availability scoring and auto-switch logic
  */
 
-import type { ClaudeProfile, ClaudeAutoSwitchSettings } from '../../shared/types';
+import type { IFlowProfile, IFlowAutoSwitchSettings } from '../../shared/types';
 import { isProfileRateLimited } from './rate-limit-manager';
 import { isProfileAuthenticated } from './profile-utils';
 
 interface ScoredProfile {
-  profile: ClaudeProfile;
+  profile: IFlowProfile;
   score: number;
 }
 
@@ -17,10 +17,10 @@ interface ScoredProfile {
  * Returns null if no good alternative is available
  */
 export function getBestAvailableProfile(
-  profiles: ClaudeProfile[],
-  settings: ClaudeAutoSwitchSettings,
+  profiles: IFlowProfile[],
+  settings: IFlowAutoSwitchSettings,
   excludeProfileId?: string
-): ClaudeProfile | null {
+): IFlowProfile | null {
   const now = new Date();
 
   // Get all profiles except the excluded one
@@ -110,10 +110,10 @@ export function getBestAvailableProfile(
  * Determine if we should proactively switch profiles based on current usage
  */
 export function shouldProactivelySwitch(
-  profile: ClaudeProfile,
-  allProfiles: ClaudeProfile[],
-  settings: ClaudeAutoSwitchSettings
-): { shouldSwitch: boolean; reason?: string; suggestedProfile?: ClaudeProfile } {
+  profile: IFlowProfile,
+  allProfiles: IFlowProfile[],
+  settings: IFlowAutoSwitchSettings
+): { shouldSwitch: boolean; reason?: string; suggestedProfile?: IFlowProfile } {
   if (!settings.enabled) {
     return { shouldSwitch: false };
   }
@@ -153,7 +153,7 @@ export function shouldProactivelySwitch(
 /**
  * Get profiles sorted by availability (best first)
  */
-export function getProfilesSortedByAvailability(profiles: ClaudeProfile[]): ClaudeProfile[] {
+export function getProfilesSortedByAvailability(profiles: IFlowProfile[]): IFlowProfile[] {
   const _now = new Date();
 
   return [...profiles].sort((a, b) => {

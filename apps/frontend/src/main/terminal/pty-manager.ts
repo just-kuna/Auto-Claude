@@ -8,7 +8,7 @@ import * as os from 'os';
 import { existsSync } from 'fs';
 import type { TerminalProcess, WindowGetter } from './types';
 import { IPC_CHANNELS } from '../../shared/constants';
-import { getClaudeProfileManager } from '../iflow-profile-manager';
+import { getIFlowProfileManager } from '../iflow-profile-manager';
 import { readSettingsFile } from '../settings-utils';
 import { debugLog, debugError } from '../../shared/utils/debug-logger';
 import type { SupportedTerminal } from '../../shared/types/settings';
@@ -263,6 +263,6 @@ export function killPty(terminal: TerminalProcess): void {
  * Get the active Claude profile environment variables
  */
 export function getActiveProfileEnv(): Record<string, string> {
-  const profileManager = getClaudeProfileManager();
+  const profileManager = getIFlowProfileManager();
   return profileManager.getActiveProfileEnv();
 }

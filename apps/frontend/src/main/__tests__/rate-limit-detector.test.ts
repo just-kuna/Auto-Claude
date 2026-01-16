@@ -6,7 +6,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 // Mock the iflow-profile-manager before importing
 vi.mock('../iflow-profile-manager', () => ({
-  getClaudeProfileManager: vi.fn(() => ({
+  getIFlowProfileManager: vi.fn(() => ({
     getActiveProfile: vi.fn(() => ({
       id: 'test-profile-id',
       name: 'Test Profile',

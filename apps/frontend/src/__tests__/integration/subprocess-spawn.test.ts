@@ -45,8 +45,8 @@ const mockProfileManager = {
 };
 
 vi.mock('../../main/iflow-profile-manager', () => ({
-  getClaudeProfileManager: () => mockProfileManager,
-  initializeClaudeProfileManager: () => Promise.resolve(mockProfileManager)
+  getIFlowProfileManager: () => mockProfileManager,
+  initializeIFlowProfileManager: () => Promise.resolve(mockProfileManager)
 }));
 
 // Mock validatePythonPath to allow test paths (security validation is tested separately)

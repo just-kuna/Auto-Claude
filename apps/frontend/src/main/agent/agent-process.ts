@@ -15,7 +15,7 @@ import type { CompletablePhase } from '../../shared/constants/phase-protocol';
 import { detectRateLimit, createSDKRateLimitInfo, getProfileEnv, detectAuthFailure } from '../rate-limit-detector';
 import { getAPIProfileEnv } from '../services/profile';
 import { projectStore } from '../project-store';
-import { getClaudeProfileManager } from '../iflow-profile-manager';
+import { getIFlowProfileManager } from '../iflow-profile-manager';
 import { parsePythonCommand, validatePythonPath } from '../python-detector';
 import { pythonEnvManager, getConfiguredPythonPath } from '../python-env-manager';
 import { buildMemoryEnvVars } from '../memory-env-builder';
@@ -190,7 +190,7 @@ export class AgentProcessManager {
     rateLimitDetection: ReturnType<typeof detectRateLimit>,
     processType: ProcessType
   ): boolean {
-    const profileManager = getClaudeProfileManager();
+    const profileManager = getIFlowProfileManager();
     const autoSwitchSettings = profileManager.getAutoSwitchSettings();
 
     console.log('[AgentProcess] Auto-switch settings:', {

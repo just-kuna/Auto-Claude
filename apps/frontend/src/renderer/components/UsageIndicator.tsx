@@ -13,15 +13,15 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from './ui/tooltip';
-import type { ClaudeUsageSnapshot } from '../../shared/types/agent';
+import type { IFlowUsageSnapshot } from '../../shared/types/agent';
 
 export function UsageIndicator() {
-  const [usage, setUsage] = useState<ClaudeUsageSnapshot | null>(null);
+  const [usage, setUsage] = useState<IFlowUsageSnapshot | null>(null);
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
     // Listen for usage updates from main process
-    const unsubscribe = window.electronAPI.onUsageUpdated((snapshot: ClaudeUsageSnapshot) => {
+    const unsubscribe = window.electronAPI.onUsageUpdated((snapshot: IFlowUsageSnapshot) => {
       setUsage(snapshot);
       setIsVisible(true);
     });

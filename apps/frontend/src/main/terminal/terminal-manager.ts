@@ -34,7 +34,7 @@ export class TerminalManager {
       this.getWindow,
       this.lastNotifiedRateLimitReset,
       async (terminalId, profileId) => {
-        await this.switchClaudeProfile(terminalId, profileId);
+        await this.switchIFlowProfile(terminalId, profileId);
       }
     );
 
@@ -200,13 +200,13 @@ export class TerminalManager {
   /**
    * Switch a terminal to a different Claude profile
    */
-  async switchClaudeProfile(id: string, profileId: string): Promise<TerminalOperationResult> {
+  async switchIFlowProfile(id: string, profileId: string): Promise<TerminalOperationResult> {
     const terminal = this.terminals.get(id);
     if (!terminal) {
       return { success: false, error: 'Terminal not found' };
     }
 
-    return ClaudeIntegration.switchClaudeProfile(
+    return ClaudeIntegration.switchIFlowProfile(
       terminal,
       profileId,
       this.getWindow,

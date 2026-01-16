@@ -41,7 +41,7 @@ import { readSettingsFile } from './settings-utils';
 import { setupErrorLogging } from './app-logger';
 import { initSentryMain } from './sentry';
 import { preWarmToolCache } from './cli-tool-manager';
-import { initializeClaudeProfileManager } from './iflow-profile-manager';
+import { initializeIFlowProfileManager } from './iflow-profile-manager';
 import type { AppSettings } from '../shared/types';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -368,7 +368,7 @@ app.whenReady().then(() => {
   // We do this sequentially to ensure profile data (including auto-switch settings)
   // is loaded BEFORE the usage monitor attempts to read settings.
   // This prevents the "UsageMonitor disabled" error due to race condition.
-  initializeClaudeProfileManager()
+  initializeIFlowProfileManager()
     .then(() => {
       // Only start monitoring if window is still available (app not quitting)
       if (mainWindow) {
