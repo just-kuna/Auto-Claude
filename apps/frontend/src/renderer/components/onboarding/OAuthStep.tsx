@@ -26,7 +26,7 @@ import { Label } from '../ui/label';
 import { Card, CardContent } from '../ui/card';
 import { cn } from '../../lib/utils';
 import { loadIFlowProfiles as loadGlobalIFlowProfiles } from '../../stores/iflow-profile-store';
-import { useClaudeLoginTerminal } from '../../hooks/useClaudeLoginTerminal';
+import { useIFlowLoginTerminal } from '../../hooks/useIFlowLoginTerminal';
 import { useToast } from '../../hooks/use-toast';
 import type { IFlowProfile } from '../../../shared/types';
 
@@ -96,7 +96,7 @@ export function OAuthStep({ onNext, onBack, onSkip }: OAuthStepProps) {
   }, []);
 
   // Listen for login terminal creation - makes the terminal visible so user can see OAuth flow
-  useClaudeLoginTerminal();
+  useIFlowLoginTerminal();
 
   // Listen for OAuth authentication completion
   useEffect(() => {

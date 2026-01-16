@@ -28,7 +28,7 @@ import { cn } from '../../lib/utils';
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
 import { SettingsSection } from './SettingsSection';
 import { loadIFlowProfiles as loadGlobalIFlowProfiles } from '../../stores/iflow-profile-store';
-import { useClaudeLoginTerminal } from '../../hooks/useClaudeLoginTerminal';
+import { useIFlowLoginTerminal } from '../../hooks/useIFlowLoginTerminal';
 import { useToast } from '../../hooks/use-toast';
 import { debugLog, debugError } from '../../../shared/utils/debug-logger';
 import type { AppSettings, IFlowProfile, IFlowAutoSwitchSettings } from '../../../shared/types';
@@ -78,7 +78,7 @@ export function IntegrationSettings({ settings, onSettingsChange, isOpen }: Inte
   }, [isOpen]);
 
   // Listen for login terminal creation - makes the terminal visible so user can see OAuth flow
-  useClaudeLoginTerminal();
+  useIFlowLoginTerminal();
 
   // Listen for OAuth authentication completion
   useEffect(() => {
