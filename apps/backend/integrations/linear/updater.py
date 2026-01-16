@@ -25,9 +25,16 @@ import os
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 
-from claude_agent_sdk import ClaudeAgentOptions, ClaudeSDKClient
+# Import client types for type hints
+if TYPE_CHECKING:
+    from core.iflow_client import IFlowClientWrapper
+    try:
+        from claude_agent_sdk import ClaudeSDKClient, ClaudeAgentOptions
+    except ImportError:
+        ClaudeSDKClient = None  # type: ignore
+        ClaudeAgentOptions = None  # type: ignore
 
 # Linear status constants (matching Valma AI team setup)
 STATUS_TODO = "Todo"
