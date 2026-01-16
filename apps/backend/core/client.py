@@ -393,7 +393,7 @@ def find_claude_cli() -> str | None:
 
     # Not found
     logger.warning(
-        "Claude CLI not found. Install with: npm install -g @anthropic-ai/claude-code"
+        "iFlow CLI not found. Install with: npm install -g @iflow-ai/iflow-cli"
     )
     with _CLI_CACHE_LOCK:
         _CLAUDE_CLI_CACHE[cache_key] = None
@@ -418,8 +418,39 @@ from agents.tools_pkg import (
     get_required_mcp_servers,
     is_tools_available,
 )
-from claude_agent_sdk import ClaudeAgentOptions, ClaudeSDKClient
-from claude_agent_sdk.types import HookMatcher
+# iFlow SDK imports - with fallback for compatibility
+try:
+    from core.iflow_client import (
+        IFlowClientWrapper,
+        SyncIFlowClient,
+        create_iflow_client,
+        is_iflow_sdk_available,
+        find_iflow_cli,
+        clear_iflow_cli_cache,
+    )
+    IFLOW_SDK_AVAILABLE = True
+except ImportError:
+    IFLOW_SDK_AVAILABLE = False
+    IFlowClientWrapper = None
+    SyncIFlowClient = None
+    create_iflow_client = None
+    is_iflow_sdk_available = lambda: False
+    find_iflow_cli = None
+    clear_iflow_cli_cache = None
+    logger.warning(
+        "iflow_client module not available. Install iflow-cli-sdk: pip install iflow-cli-sdk"
+    )
+
+# Legacy Claude SDK support (for gradual migration)
+try:
+    from claude_agent_sdk import ClaudeAgentOptions, ClaudeSDKClient
+    from claude_agent_sdk.types import HookMatcher
+    CLAUDE_SDK_AVAILABLE = True
+except ImportError:
+    CLAUDE_SDK_AVAILABLE = False
+    ClaudeAgentOptions = None
+    ClaudeSDKClient = None
+    HookMatcher = None
 from core.auth import get_sdk_env_vars, require_auth_token
 from linear_updater import is_linear_enabled
 from prompts_pkg.project_context import detect_project_capabilities, load_project_index
