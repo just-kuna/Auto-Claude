@@ -1097,13 +1097,27 @@ def create_client(
         print("   - CLAUDE.md: disabled by project settings")
     print()
 
-    # Find Claude CLI path for SDK
-    # This ensures the SDK can find the Claude Code binary even if it's not in PATH
-    cli_path = find_claude_cli()
-    if cli_path:
-        print(f"   - Claude CLI: {cli_path}")
-    else:
-        print("   - Claude CLI: using SDK default detection")
+    # Determine which SDK to use (prefer iFlow if available)
+    use_iflow = IFLOW_SDK_AVAILABLE and os.environ.get("USE_IFLOW_SDK", "true").lower() == "true"
+    
+    # Find CLI path for SDK
+    # Try iFlow first if enabled, fallback to Claude
+    cli_path = None
+    if use_iflow and find_iflow_cli:
+        cli_path = find_iflow_cli()
+        if cli_path:
+            print(f"   - iFlow CLI: {cli_path}")
+        else:
+            print("   - iFlow CLI: not found, falling back to Claude SDK")
+            use_iflow = False
+    
+    # Fallback to Claude CLI if iFlow not available
+    if not use_iflow and CLAUDE_SDK_AVAILABLE:
+        cli_path = find_claude_cli()
+        if cli_path:
+            print(f"   - Claude CLI: {cli_path}")
+        else:
+            print("   - Claude CLI: using SDK default detection")
 
     # Build options dict, conditionally including output_format
     options_kwargs: dict[str, Any] = {
@@ -1129,7 +1143,7 @@ def create_client(
         "enable_file_checkpointing": True,
     }
 
-    # Add CLI path if found (helps SDK find Claude Code in non-standard locations)
+    # Add CLI path if found (helps SDK find CLI in non-standard locations)
     if cli_path:
         options_kwargs["cli_path"] = cli_path
 
@@ -1143,4 +1157,31 @@ def create_client(
     if agents:
         options_kwargs["agents"] = agents
 
-    return ClaudeSDKClient(options=ClaudeAgentOptions(**options_kwargs))
+    # Create and return appropriate SDK client
+    if use_iflow and IFLOW_SDK_AVAILABLE:
+        # iFlow SDK - use wrapper for compatibility
+        logger.info("Creating iFlow SDK client")
+        # Note: iFlow SDK has different options, we'll need to adapt
+        # For now, create a basic client with available options
+        if create_iflow_client:
+            return create_iflow_client(
+                project_dir=project_dir,
+                spec_dir=spec_dir,
+                model=model,
+                agent_type=agent_type,
+                approval_mode="yolo",  # Auto-approve for compatibility
+            )
+        else:
+            raise RuntimeError("iFlow SDK available but create_iflow_client not imported")
+    elif CLAUDE_SDK_AVAILABLE:
+        # Claude SDK - original implementation
+        logger.info("Creating Claude SDK client")
+        return ClaudeSDKClient(options=ClaudeAgentOptions(**options_kwargs))
+    else:
+        # Neither SDK available
+        raise RuntimeError(
+            "No AI SDK available. Install either:\n"
+            "  - iFlow CLI SDK: pip install iflow-cli-sdk\n"
+            "  - Claude Agent SDK: pip install claude-agent-sdk"
+        )
+
