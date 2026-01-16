@@ -16,7 +16,7 @@ export const DEFAULT_CLAUDE_CONFIG_DIR = join(homedir(), '.claude');
 /**
  * Default profiles directory for additional accounts
  */
-export const CLAUDE_PROFILES_DIR = join(homedir(), '.claude-profiles');
+export const CLAUDE_PROFILES_DIR = join(homedir(), '.iflow-profiles');
 
 /**
  * Generate a unique ID for a new profile

@@ -23,25 +23,25 @@ import type {
 } from '../shared/types';
 
 // Module imports
-import { encryptToken, decryptToken } from './claude-profile/token-encryption';
-import { parseUsageOutput } from './claude-profile/usage-parser';
+import { encryptToken, decryptToken } from './iflow-profile/token-encryption';
+import { parseUsageOutput } from './iflow-profile/usage-parser';
 import {
   recordRateLimitEvent as recordRateLimitEventImpl,
   isProfileRateLimited as isProfileRateLimitedImpl,
   clearRateLimitEvents as clearRateLimitEventsImpl
-} from './claude-profile/rate-limit-manager';
+} from './iflow-profile/rate-limit-manager';
 import {
   loadProfileStore,
   loadProfileStoreAsync,
   saveProfileStore,
   ProfileStoreData,
   DEFAULT_AUTO_SWITCH_SETTINGS
-} from './claude-profile/profile-storage';
+} from './iflow-profile/profile-storage';
 import {
   getBestAvailableProfile,
   shouldProactivelySwitch as shouldProactivelySwitchImpl,
   getProfilesSortedByAvailability as getProfilesSortedByAvailabilityImpl
-} from './claude-profile/profile-scorer';
+} from './iflow-profile/profile-scorer';
 import {
   DEFAULT_CLAUDE_CONFIG_DIR,
   generateProfileId as generateProfileIdImpl,
@@ -49,7 +49,7 @@ import {
   isProfileAuthenticated as isProfileAuthenticatedImpl,
   hasValidToken,
   expandHomePath
-} from './claude-profile/profile-utils';
+} from './iflow-profile/profile-utils';
 
 /**
  * Manages Claude Code profiles for multi-account support.
@@ -64,7 +64,7 @@ export class ClaudeProfileManager {
 
   constructor() {
     this.configDir = join(app.getPath('userData'), 'config');
-    this.storePath = join(this.configDir, 'claude-profiles.json');
+    this.storePath = join(this.configDir, 'iflow-profiles.json');
 
     // DON'T do file I/O here - defer to async initialize()
     // Start with default data until initialized

@@ -4,8 +4,8 @@
  */
 
 export type {
-  ClaudeProfile,
-  ClaudeProfileSettings,
+  IFlowProfile,
+  IFlowProfileSettings,
   ClaudeUsageData,
   ClaudeRateLimitEvent,
   ClaudeAutoSwitchSettings

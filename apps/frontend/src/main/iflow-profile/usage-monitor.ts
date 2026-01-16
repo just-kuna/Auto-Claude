@@ -10,7 +10,7 @@
  */
 
 import { EventEmitter } from 'events';
-import { getClaudeProfileManager } from '../claude-profile-manager';
+import { getClaudeProfileManager } from '../iflow-profile-manager';
 import { ClaudeUsageSnapshot } from '../../shared/types/agent';
 
 export class UsageMonitor extends EventEmitter {
