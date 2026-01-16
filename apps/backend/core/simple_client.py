@@ -1,8 +1,8 @@
 """
-Simple Claude SDK Client Factory
+Simple iFlow SDK Client Factory
 ================================
 
-Factory for creating minimal Claude SDK clients for single-turn utility operations
+Factory for creating minimal iFlow SDK clients for single-turn utility operations
 like commit message generation, merge conflict resolution, and batch analysis.
 
 These clients don't need full security configurations, MCP servers, or hooks.
@@ -21,25 +21,36 @@ Example usage:
     client = create_simple_client(agent_type="insights", cwd=project_dir)
 """
 
+import os
 from pathlib import Path
+from typing import Any
 
 from agents.tools_pkg import get_agent_config, get_default_thinking_level
-from claude_agent_sdk import ClaudeAgentOptions, ClaudeSDKClient
-from core.auth import get_sdk_env_vars, require_auth_token
-from core.client import find_claude_cli
+from core.auth import get_sdk_env_vars, require_auth_token, ensure_iflow_api_key
+from core.iflow_client import (
+    SyncIFlowClient,
+    IFlowClientWrapper,
+    find_iflow_cli,
+    is_iflow_sdk_available,
+    simple_query_sync,
+)
 from phase_config import get_thinking_budget
+
+
+# Default model for simple operations (fast and efficient)
+DEFAULT_SIMPLE_MODEL = "Qwen3-Coder"
 
 
 def create_simple_client(
     agent_type: str = "merge_resolver",
-    model: str = "claude-haiku-4-5-20251001",
+    model: str = DEFAULT_SIMPLE_MODEL,
     system_prompt: str | None = None,
     cwd: Path | None = None,
     max_turns: int = 1,
     max_thinking_tokens: int | None = None,
-) -> ClaudeSDKClient:
+) -> SyncIFlowClient:
     """
-    Create a minimal Claude SDK client for single-turn utility operations.
+    Create a minimal iFlow SDK client for single-turn utility operations.
 
     This factory creates lightweight clients without MCP servers, security hooks,
     or full permission configurations. Use for text-only analysis tasks.
@@ -52,7 +63,7 @@ def create_simple_client(
                    - "insights" - Read-only code insight extraction
                    - "batch_analysis" - Read-only batch issue analysis
                    - "batch_validation" - Read-only validation
-        model: Claude model to use (defaults to Haiku for fast/cheap operations)
+        model: iFlow model to use (defaults to Qwen3-Coder for fast operations)
         system_prompt: Optional custom system prompt (for specialized tasks)
         cwd: Working directory for file operations (optional)
         max_turns: Maximum conversation turns (default: 1 for single-turn)
@@ -60,16 +71,15 @@ def create_simple_client(
                             AGENT_CONFIGS, converted using phase_config.THINKING_BUDGET_MAP)
 
     Returns:
-        Configured ClaudeSDKClient for single-turn operations
+        Configured SyncIFlowClient for single-turn operations
 
     Raises:
         ValueError: If agent_type is not found in AGENT_CONFIGS
+        RuntimeError: If iFlow SDK is not available
     """
-    # Get authentication
-    oauth_token = require_auth_token()
-    import os
-
-    os.environ["CLAUDE_CODE_OAUTH_TOKEN"] = oauth_token
+    # Ensure API key is available
+    ensure_iflow_api_key()
+    api_key = require_auth_token()
 
     # Get environment variables for SDK
     sdk_env = get_sdk_env_vars()
@@ -85,22 +95,69 @@ def create_simple_client(
         thinking_level = get_default_thinking_level(agent_type)
         max_thinking_tokens = get_thinking_budget(thinking_level)
 
-    # Find Claude CLI path (handles non-standard installations)
-    cli_path = find_claude_cli()
+    # Find iFlow CLI path (handles non-standard installations)
+    cli_path = find_iflow_cli()
 
-    # Build options dict
-    options_kwargs = {
-        "model": model,
-        "system_prompt": system_prompt,
-        "allowed_tools": allowed_tools,
-        "max_turns": max_turns,
-        "cwd": str(cwd.resolve()) if cwd else None,
-        "env": sdk_env,
-        "max_thinking_tokens": max_thinking_tokens,
-    }
+    # Create synchronous client
+    return SyncIFlowClient(
+        api_key=api_key,
+        model=model,
+        working_directory=str(cwd.resolve()) if cwd else None,
+        approval_mode="yolo",  # Simple clients use YOLO mode for efficiency
+    )
 
-    # Add CLI path if found
-    if cli_path:
-        options_kwargs["cli_path"] = cli_path
 
-    return ClaudeSDKClient(options=ClaudeAgentOptions(**options_kwargs))
+async def create_simple_client_async(
+    agent_type: str = "merge_resolver",
+    model: str = DEFAULT_SIMPLE_MODEL,
+    system_prompt: str | None = None,
+    cwd: Path | None = None,
+    max_turns: int = 1,
+    max_thinking_tokens: int | None = None,
+) -> IFlowClientWrapper:
+    """
+    Create a minimal async iFlow SDK client for single-turn utility operations.
+
+    Same as create_simple_client but returns an async client.
+
+    Args:
+        Same as create_simple_client
+
+    Returns:
+        Configured IFlowClientWrapper for async single-turn operations
+    """
+    # Ensure API key is available
+    ensure_iflow_api_key()
+    api_key = require_auth_token()
+
+    # Get agent configuration (raises ValueError if unknown type)
+    config = get_agent_config(agent_type)
+
+    # Create async client
+    return IFlowClientWrapper(
+        api_key=api_key,
+        model=model,
+        working_directory=str(cwd.resolve()) if cwd else None,
+        approval_mode="yolo",
+    )
+
+
+def simple_query(prompt: str, model: str = DEFAULT_SIMPLE_MODEL) -> str:
+    """
+    Simple synchronous query for one-off AI requests.
+
+    This is the simplest way to get an AI response without managing clients.
+
+    Args:
+        prompt: The prompt to send
+        model: Model to use (default: Qwen3-Coder)
+
+    Returns:
+        The AI response as a string
+
+    Example:
+        response = simple_query("What is 2+2?")
+        print(response)  # "4"
+    """
+    ensure_iflow_api_key()
+    return simple_query_sync(prompt, model)

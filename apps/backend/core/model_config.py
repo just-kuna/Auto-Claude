@@ -4,6 +4,12 @@ Model Configuration Utilities
 
 Shared utilities for reading and parsing model configuration from environment variables.
 Used by both commit_message.py and merge resolver.
+
+iFlow supports multiple models:
+- Qwen3-Coder (default, fast and efficient)
+- Qwen3-Coder-Plus (more capable)
+- Kimi K2 (advanced reasoning)
+- DeepSeek v3 (code-focused)
 """
 
 import logging
@@ -12,7 +18,16 @@ import os
 logger = logging.getLogger(__name__)
 
 # Default model for utility operations (commit messages, merge resolution)
-DEFAULT_UTILITY_MODEL = "claude-haiku-4-5-20251001"
+# Using Qwen3-Coder as it's fast and efficient for simple tasks
+DEFAULT_UTILITY_MODEL = "Qwen3-Coder"
+
+# Available iFlow models (for reference)
+IFLOW_MODELS = {
+    "fast": "Qwen3-Coder",  # Fast, efficient for simple tasks
+    "capable": "Qwen3-Coder-Plus",  # More capable for complex tasks
+    "reasoning": "Kimi-K2",  # Advanced reasoning
+    "code": "DeepSeek-V3",  # Code-focused
+}
 
 
 def get_utility_model_config(
