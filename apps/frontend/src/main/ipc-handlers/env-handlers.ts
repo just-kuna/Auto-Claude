@@ -597,13 +597,13 @@ ${existingVars['GRAPHITI_DB_PATH'] ? `GRAPHITI_DB_PATH=${existingVars['GRAPHITI_
       if ('error' in resolved) {
         return { success: false, error: resolved.error };
       }
-      const claudeCmd = resolved.command;
+      const iflowCmd = resolved.command;
       const claudeEnv = resolved.env;
 
       try {
         // Check if Claude CLI is available and authenticated
         const result = await new Promise<ClaudeAuthResult>((resolve) => {
-          const proc = spawn(getSpawnCommand(claudeCmd), ['--version'], getSpawnOptions(claudeCmd, {
+          const proc = spawn(getSpawnCommand(iflowCmd), ['--version'], getSpawnOptions(iflowCmd, {
             cwd: project.path,
             env: claudeEnv,
           }));
@@ -623,7 +623,7 @@ ${existingVars['GRAPHITI_DB_PATH'] ? `GRAPHITI_DB_PATH=${existingVars['GRAPHITI_
             if (code === 0) {
               // Claude CLI is available, check if authenticated
               // Run a simple command that requires auth
-              const authCheck = spawn(getSpawnCommand(claudeCmd), ['api', '--help'], getSpawnOptions(claudeCmd, {
+              const authCheck = spawn(getSpawnCommand(iflowCmd), ['api', '--help'], getSpawnOptions(iflowCmd, {
                 cwd: project.path,
                 env: claudeEnv,
               }));
@@ -686,13 +686,13 @@ ${existingVars['GRAPHITI_DB_PATH'] ? `GRAPHITI_DB_PATH=${existingVars['GRAPHITI_
       if ('error' in resolved) {
         return { success: false, error: resolved.error };
       }
-      const claudeCmd = resolved.command;
+      const iflowCmd = resolved.command;
       const claudeEnv = resolved.env;
 
       try {
         // Run claude setup-token which will open browser for OAuth
         const result = await new Promise<ClaudeAuthResult>((resolve) => {
-          const proc = spawn(getSpawnCommand(claudeCmd), ['setup-token'], getSpawnOptions(claudeCmd, {
+          const proc = spawn(getSpawnCommand(iflowCmd), ['setup-token'], getSpawnOptions(iflowCmd, {
             cwd: project.path,
             env: claudeEnv,
             stdio: 'inherit' // This allows the terminal to handle the interactive auth

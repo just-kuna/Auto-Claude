@@ -58,7 +58,7 @@ type ClaudeCommandConfig =
  *
  * @param cwdCommand - Command to change directory (empty string if no change needed)
  * @param pathPrefix - PATH prefix for Claude CLI (empty string if not needed)
- * @param escapedClaudeCmd - Shell-escaped Claude CLI command
+ * @param escapedIflowCmd - Shell-escaped Claude CLI command
  * @param config - Configuration object with method and required options (discriminated union)
  * @param extraFlags - Optional extra flags to append to the command (e.g., '--dangerously-skip-permissions')
  * @returns Complete shell command string ready for terminal.pty.write()
@@ -75,11 +75,11 @@ type ClaudeCommandConfig =
 export function buildClaudeShellCommand(
   cwdCommand: string,
   pathPrefix: string,
-  escapedClaudeCmd: string,
+  escapedIflowCmd: string,
   config: ClaudeCommandConfig,
   extraFlags?: string
 ): string {
-  const fullCmd = extraFlags ? `${escapedClaudeCmd}${extraFlags}` : escapedClaudeCmd;
+  const fullCmd = extraFlags ? `${escapedIflowCmd}${extraFlags}` : escapedIflowCmd;
   switch (config.method) {
     case 'temp-file':
       return `clear && ${cwdCommand}HISTFILE= HISTCONTROL=ignorespace ${pathPrefix}bash -c "source ${config.escapedTempFile} && rm -f ${config.escapedTempFile} && exec ${fullCmd}"\r`;
@@ -419,9 +419,9 @@ export function invokeClaude(
 
   const cwdCommand = buildCdCommand(cwd);
   const { command: iflowCmd, env: iflowEnv } = getIFlowCliInvocation();
-  const escapedClaudeCmd = escapeShellArg(claudeCmd);
-  const pathPrefix = claudeEnv.PATH
-    ? `PATH=${escapeShellArg(normalizePathForBash(claudeEnv.PATH))} `
+  const escapedIflowCmd = escapeShellArg(iflowCmd);
+  const pathPrefix = iflowEnv.PATH
+    ? `PATH=${escapeShellArg(normalizePathForBash(iflowEnv.PATH))} `
     : '';
   const needsEnvOverride = profileId && profileId !== previousProfileId;
 
@@ -449,7 +449,7 @@ export function invokeClaude(
         { mode: 0o600 }
       );
 
-      const command = buildClaudeShellCommand(cwdCommand, pathPrefix, escapedClaudeCmd, { method: 'temp-file', escapedTempFile }, extraFlags);
+      const command = buildClaudeShellCommand(cwdCommand, pathPrefix, escapedIflowCmd, { method: 'temp-file', escapedTempFile }, extraFlags);
       debugLog('[ClaudeIntegration:invokeClaude] Executing command (temp file method, history-safe)');
       terminal.pty.write(command);
       profileManager.markProfileUsed(activeProfile.id);
@@ -458,7 +458,7 @@ export function invokeClaude(
       return;
     } else if (activeProfile.configDir) {
       const escapedConfigDir = escapeShellArg(activeProfile.configDir);
-      const command = buildClaudeShellCommand(cwdCommand, pathPrefix, escapedClaudeCmd, { method: 'config-dir', escapedConfigDir }, extraFlags);
+      const command = buildClaudeShellCommand(cwdCommand, pathPrefix, escapedIflowCmd, { method: 'config-dir', escapedConfigDir }, extraFlags);
       debugLog('[ClaudeIntegration:invokeClaude] Executing command (configDir method, history-safe)');
       terminal.pty.write(command);
       profileManager.markProfileUsed(activeProfile.id);
@@ -474,7 +474,7 @@ export function invokeClaude(
     debugLog('[ClaudeIntegration:invokeClaude] Using terminal environment for non-default profile:', activeProfile.name);
   }
 
-  const command = buildClaudeShellCommand(cwdCommand, pathPrefix, escapedClaudeCmd, { method: 'default' }, extraFlags);
+  const command = buildClaudeShellCommand(cwdCommand, pathPrefix, escapedIflowCmd, { method: 'default' }, extraFlags);
   debugLog('[ClaudeIntegration:invokeClaude] Executing command (default method):', command);
   terminal.pty.write(command);
 
@@ -506,9 +506,9 @@ export function resumeClaude(
   SessionHandler.releaseSessionId(terminal.id);
 
   const { command: iflowCmd, env: iflowEnv } = getIFlowCliInvocation();
-  const escapedClaudeCmd = escapeShellArg(claudeCmd);
-  const pathPrefix = claudeEnv.PATH
-    ? `PATH=${escapeShellArg(normalizePathForBash(claudeEnv.PATH))} `
+  const escapedIflowCmd = escapeShellArg(iflowCmd);
+  const pathPrefix = iflowEnv.PATH
+    ? `PATH=${escapeShellArg(normalizePathForBash(iflowEnv.PATH))} `
     : '';
 
   // Always use --continue which resumes the most recent session in the current directory.
@@ -524,7 +524,7 @@ export function resumeClaude(
     console.warn('[ClaudeIntegration:resumeClaude] sessionId parameter is deprecated and ignored; using claude --continue instead');
   }
 
-  const command = `${pathPrefix}${escapedClaudeCmd} --continue`;
+  const command = `${pathPrefix}${escapedIflowCmd} --continue`;
 
   terminal.pty.write(`${command}\r`);
 
@@ -597,9 +597,9 @@ export async function invokeClaudeAsync(
   // Async CLI invocation - non-blocking
   const cwdCommand = buildCdCommand(cwd);
   const { command: iflowCmd, env: iflowEnv } = await getIFlowCliInvocationAsync();
-  const escapedClaudeCmd = escapeShellArg(claudeCmd);
-  const pathPrefix = claudeEnv.PATH
-    ? `PATH=${escapeShellArg(normalizePathForBash(claudeEnv.PATH))} `
+  const escapedIflowCmd = escapeShellArg(iflowCmd);
+  const pathPrefix = iflowEnv.PATH
+    ? `PATH=${escapeShellArg(normalizePathForBash(iflowEnv.PATH))} `
     : '';
   const needsEnvOverride = profileId && profileId !== previousProfileId;
 
@@ -627,7 +627,7 @@ export async function invokeClaudeAsync(
         { mode: 0o600 }
       );
 
-      const command = buildClaudeShellCommand(cwdCommand, pathPrefix, escapedClaudeCmd, { method: 'temp-file', escapedTempFile }, extraFlags);
+      const command = buildClaudeShellCommand(cwdCommand, pathPrefix, escapedIflowCmd, { method: 'temp-file', escapedTempFile }, extraFlags);
       debugLog('[ClaudeIntegration:invokeClaudeAsync] Executing command (temp file method, history-safe)');
       terminal.pty.write(command);
       profileManager.markProfileUsed(activeProfile.id);
@@ -636,7 +636,7 @@ export async function invokeClaudeAsync(
       return;
     } else if (activeProfile.configDir) {
       const escapedConfigDir = escapeShellArg(activeProfile.configDir);
-      const command = buildClaudeShellCommand(cwdCommand, pathPrefix, escapedClaudeCmd, { method: 'config-dir', escapedConfigDir }, extraFlags);
+      const command = buildClaudeShellCommand(cwdCommand, pathPrefix, escapedIflowCmd, { method: 'config-dir', escapedConfigDir }, extraFlags);
       debugLog('[ClaudeIntegration:invokeClaudeAsync] Executing command (configDir method, history-safe)');
       terminal.pty.write(command);
       profileManager.markProfileUsed(activeProfile.id);
@@ -652,7 +652,7 @@ export async function invokeClaudeAsync(
     debugLog('[ClaudeIntegration:invokeClaudeAsync] Using terminal environment for non-default profile:', activeProfile.name);
   }
 
-  const command = buildClaudeShellCommand(cwdCommand, pathPrefix, escapedClaudeCmd, { method: 'default' }, extraFlags);
+  const command = buildClaudeShellCommand(cwdCommand, pathPrefix, escapedIflowCmd, { method: 'default' }, extraFlags);
   debugLog('[ClaudeIntegration:invokeClaudeAsync] Executing command (default method):', command);
   terminal.pty.write(command);
 
@@ -680,9 +680,9 @@ export async function resumeClaudeAsync(
 
   // Async CLI invocation - non-blocking
   const { command: iflowCmd, env: iflowEnv } = await getIFlowCliInvocationAsync();
-  const escapedClaudeCmd = escapeShellArg(claudeCmd);
-  const pathPrefix = claudeEnv.PATH
-    ? `PATH=${escapeShellArg(normalizePathForBash(claudeEnv.PATH))} `
+  const escapedIflowCmd = escapeShellArg(iflowCmd);
+  const pathPrefix = iflowEnv.PATH
+    ? `PATH=${escapeShellArg(normalizePathForBash(iflowEnv.PATH))} `
     : '';
 
   // Always use --continue which resumes the most recent session in the current directory.
@@ -698,7 +698,7 @@ export async function resumeClaudeAsync(
     console.warn('[ClaudeIntegration:resumeClaudeAsync] sessionId parameter is deprecated and ignored; using claude --continue instead');
   }
 
-  const command = `${pathPrefix}${escapedClaudeCmd} --continue`;
+  const command = `${pathPrefix}${escapedIflowCmd} --continue`;
 
   terminal.pty.write(`${command}\r`);
 

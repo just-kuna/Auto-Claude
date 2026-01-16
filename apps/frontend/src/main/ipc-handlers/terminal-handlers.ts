@@ -379,12 +379,12 @@ export function registerTerminalHandlers(
         debugLog('[IPC:CLAUDE_PROFILE_INITIALIZE] Getting Claude CLI invocation...');
         let loginCommand: string;
         const { command: iflowCmd } = await getIFlowCliInvocationAsync();
-        debugLog('[IPC:CLAUDE_PROFILE_INITIALIZE] Got Claude CLI:', claudeCmd);
+        debugLog('[IPC:CLAUDE_PROFILE_INITIALIZE] Got Claude CLI:', iflowCmd);
 
         // Use the full path directly - escaping only needed for paths with spaces
         const shellClaudeCmd = process.platform === 'win32'
-          ? `"${escapeShellArgWindows(claudeCmd)}"`
-          : escapeShellArg(claudeCmd);
+          ? `"${escapeShellArgWindows(iflowCmd)}"`
+          : escapeShellArg(iflowCmd);
 
         if (!profile.isDefault && profile.configDir) {
           if (process.platform === 'win32') {
