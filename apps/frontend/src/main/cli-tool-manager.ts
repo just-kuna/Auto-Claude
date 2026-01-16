@@ -1,7 +1,7 @@
 /**
  * CLI Tool Manager
  *
- * Centralized management for CLI tools (Python, Git, GitHub CLI, Claude CLI) used throughout
+ * Centralized management for CLI tools (Python, Git, GitHub CLI, iFlow CLI) used throughout
  * the application. Provides intelligent multi-level detection with user
  * configuration support.
  *
@@ -15,7 +15,7 @@
  * Features:
  * - Session-based caching (no TTL - cache persists until app restart or settings
  *   change)
- * - Version validation (Python 3.10+ required for claude-agent-sdk)
+ * - Version validation (Python 3.10+ required for iflow-cli-sdk)
  * - Platform-aware detection (macOS, Windows, Linux)
  * - Graceful fallbacks when tools not found
  */
@@ -53,7 +53,7 @@ import {
 /**
  * Supported CLI tools managed by this system
  */
-export type CLITool = 'python' | 'git' | 'gh' | 'claude';
+export type CLITool = 'python' | 'git' | 'gh' | 'iflow';
 
 /**
  * User configuration for CLI tool paths
@@ -63,7 +63,7 @@ export interface ToolConfig {
   pythonPath?: string;
   gitPath?: string;
   githubCLIPath?: string;
-  claudePath?: string;
+  iflowPath?: string;
 }
 
 /**
@@ -129,9 +129,9 @@ function isWrongPlatformPath(pathStr: string | undefined): boolean {
 // ============================================================================
 
 /**
- * Configuration for Claude CLI detection paths
+ * Configuration for iFlow CLI detection paths
  */
-interface ClaudeDetectionPaths {
+interface IFlowDetectionPaths {
   /** Homebrew paths for macOS (Apple Silicon and Intel) */
   homebrewPaths: string[];
   /** Platform-specific standard installation paths */
@@ -141,46 +141,46 @@ interface ClaudeDetectionPaths {
 }
 
 /**
- * Get all candidate paths for Claude CLI detection.
+ * Get all candidate paths for iFlow CLI detection.
  *
- * Returns platform-specific paths where Claude CLI might be installed.
+ * Returns platform-specific paths where iFlow CLI might be installed.
  * This pure function consolidates path configuration used by both sync
  * and async detection methods.
  *
  * IMPORTANT: This function has a corresponding implementation in the Python backend:
- * apps/backend/core/client.py (_get_claude_detection_paths)
+ * apps/backend/core/client.py (_get_iflow_detection_paths)
  *
  * Both implementations MUST be kept in sync to ensure consistent detection behavior
  * across the Electron frontend and Python backend.
  *
  * When adding new detection paths, update BOTH:
- * 1. This function (getClaudeDetectionPaths in cli-tool-manager.ts)
- * 2. _get_claude_detection_paths() in client.py
+ * 1. This function (getIFlowDetectionPaths in cli-tool-manager.ts)
+ * 2. _get_iflow_detection_paths() in client.py
  *
  * @param homeDir - User's home directory (from os.homedir())
  * @returns Object containing homebrew, platform, and NVM paths
  *
  * @example
- * const paths = getClaudeDetectionPaths('/Users/john');
- * // On macOS: { homebrewPaths: ['/opt/homebrew/bin/claude', ...], ... }
+ * const paths = getIFlowDetectionPaths('/Users/john');
+ * // On macOS: { homebrewPaths: ['/opt/homebrew/bin/iflow', ...], ... }
  */
-export function getClaudeDetectionPaths(homeDir: string): ClaudeDetectionPaths {
+export function getIFlowDetectionPaths(homeDir: string): IFlowDetectionPaths {
   const homebrewPaths = [
-    '/opt/homebrew/bin/claude', // Apple Silicon
-    '/usr/local/bin/claude',    // Intel Mac
+    '/opt/homebrew/bin/iflow', // Apple Silicon
+    '/usr/local/bin/iflow',    // Intel Mac
   ];
 
   const platformPaths = process.platform === 'win32'
     ? [
-        path.join(homeDir, 'AppData', 'Local', 'Programs', 'claude', 'claude.exe'),
-        path.join(homeDir, 'AppData', 'Roaming', 'npm', 'claude.cmd'),
-        path.join(homeDir, '.local', 'bin', 'claude.exe'),
-        'C:\\Program Files\\Claude\\claude.exe',
-        'C:\\Program Files (x86)\\Claude\\claude.exe',
+        path.join(homeDir, 'AppData', 'Local', 'Programs', 'iflow', 'iflow.exe'),
+        path.join(homeDir, 'AppData', 'Roaming', 'npm', 'iflow.cmd'),
+        path.join(homeDir, '.local', 'bin', 'iflow.exe'),
+        'C:\\Program Files\\iFlow\\iflow.exe',
+        'C:\\Program Files (x86)\\iFlow\\iflow.exe',
       ]
     : [
-        path.join(homeDir, '.local', 'bin', 'claude'),
-        path.join(homeDir, 'bin', 'claude'),
+        path.join(homeDir, '.local', 'bin', 'iflow'),
+        path.join(homeDir, 'bin', 'iflow'),
       ];
 
   const nvmVersionsDir = path.join(homeDir, '.nvm', 'versions', 'node');
@@ -234,23 +234,23 @@ export function sortNvmVersionDirs(
  * Returns null if validation failed, otherwise constructs the full result object.
  * This helper consolidates the result-building logic used throughout detection.
  *
- * @param claudePath - The path that was validated
- * @param validation - The validation result from validateClaude/validateClaudeAsync
+ * @param iflowPath - The path that was validated
+ * @param validation - The validation result from validateIFlow/validateIFlowAsync
  * @param source - The source of detection ('user-config', 'homebrew', 'system-path', 'nvm')
- * @param messagePrefix - Prefix for the success message (e.g., 'Using Homebrew Claude CLI')
+ * @param messagePrefix - Prefix for the success message (e.g., 'Using Homebrew iFlow CLI')
  * @returns ToolDetectionResult if valid, null if validation failed
  *
  * @example
- * const result = buildClaudeDetectionResult(
- *   '/opt/homebrew/bin/claude',
+ * const result = buildIFlowDetectionResult(
+ *   '/opt/homebrew/bin/iflow',
  *   { valid: true, version: '1.0.0', message: 'OK' },
  *   'homebrew',
- *   'Using Homebrew Claude CLI'
+ *   'Using Homebrew iFlow CLI'
  * );
- * // Returns: { found: true, path: '/opt/homebrew/bin/claude', version: '1.0.0', ... }
+ * // Returns: { found: true, path: '/opt/homebrew/bin/iflow', version: '1.0.0', ... }
  */
-export function buildClaudeDetectionResult(
-  claudePath: string,
+export function buildIFlowDetectionResult(
+  iflowPath: string,
   validation: ToolValidation,
   source: ToolDetectionResult['source'],
   messagePrefix: string
@@ -260,10 +260,10 @@ export function buildClaudeDetectionResult(
   }
   return {
     found: true,
-    path: claudePath,
+    path: iflowPath,
     version: validation.version,
     source,
-    message: `${messagePrefix}: ${claudePath}`,
+    message: `${messagePrefix}: ${iflowPath}`,
   };
 }
 
@@ -353,8 +353,8 @@ class CLIToolManager {
         return this.detectGit();
       case 'gh':
         return this.detectGitHubCLI();
-      case 'claude':
-        return this.detectClaude();
+      case 'iflow':
+        return this.detectIFlow();
       default:
         return {
           found: false,
@@ -373,7 +373,7 @@ class CLIToolManager {
    * 3. Homebrew Python (macOS)
    * 4. System PATH (py -3, python3, python)
    *
-   * Validates Python version >= 3.10.0 (required by claude-agent-sdk)
+   * Validates Python version >= 3.10.0 (required by iflow-cli-sdk)
    *
    * @returns Detection result for Python
    */
@@ -703,7 +703,7 @@ class CLIToolManager {
   }
 
   /**
-   * Detect Claude CLI with multi-level priority
+   * Detect iFlow CLI with multi-level priority
    *
    * Priority order:
    * 1. User configuration (if valid for current platform)
@@ -713,57 +713,57 @@ class CLIToolManager {
    * 5. NVM paths (Unix only - checks Node.js version managers)
    * 6. Platform-specific standard locations
    *
-   * @returns Detection result for Claude CLI
+   * @returns Detection result for iFlow CLI
    */
-  private detectClaude(): ToolDetectionResult {
+  private detectIFlow(): ToolDetectionResult {
     const homeDir = os.homedir();
-    const paths = getClaudeDetectionPaths(homeDir);
+    const paths = getIFlowDetectionPaths(homeDir);
 
     // 1. User configuration
-    if (this.userConfig.claudePath) {
-      if (isWrongPlatformPath(this.userConfig.claudePath)) {
+    if (this.userConfig.iflowPath) {
+      if (isWrongPlatformPath(this.userConfig.iflowPath)) {
         console.warn(
-          `[Claude CLI] User-configured path is from different platform, ignoring: ${this.userConfig.claudePath}`
+          `[iFlow CLI] User-configured path is from different platform, ignoring: ${this.userConfig.iflowPath}`
         );
-      } else if (process.platform === 'win32' && !isSecurePath(this.userConfig.claudePath)) {
+      } else if (process.platform === 'win32' && !isSecurePath(this.userConfig.iflowPath)) {
         console.warn(
-          `[Claude CLI] User-configured path failed security validation, ignoring: ${this.userConfig.claudePath}`
+          `[iFlow CLI] User-configured path failed security validation, ignoring: ${this.userConfig.iflowPath}`
         );
       } else {
-        const validation = this.validateClaude(this.userConfig.claudePath);
-        const result = buildClaudeDetectionResult(
-          this.userConfig.claudePath, validation, 'user-config', 'Using user-configured Claude CLI'
+        const validation = this.validateIFlow(this.userConfig.iflowPath);
+        const result = buildIFlowDetectionResult(
+          this.userConfig.iflowPath, validation, 'user-config', 'Using user-configured iFlow CLI'
         );
         if (result) return result;
-        console.warn(`[Claude CLI] User-configured path invalid: ${validation.message}`);
+        console.warn(`[iFlow CLI] User-configured path invalid: ${validation.message}`);
       }
     }
 
     // 2. Homebrew (macOS)
     if (process.platform === 'darwin') {
-      for (const claudePath of paths.homebrewPaths) {
-        if (existsSync(claudePath)) {
-          const validation = this.validateClaude(claudePath);
-          const result = buildClaudeDetectionResult(claudePath, validation, 'homebrew', 'Using Homebrew Claude CLI');
+      for (const iflowPath of paths.homebrewPaths) {
+        if (existsSync(iflowPath)) {
+          const validation = this.validateIFlow(iflowPath);
+          const result = buildIFlowDetectionResult(iflowPath, validation, 'homebrew', 'Using Homebrew iFlow CLI');
           if (result) return result;
         }
       }
     }
 
     // 3. System PATH (augmented)
-    const systemClaudePath = findExecutable('claude');
-    if (systemClaudePath) {
-      const validation = this.validateClaude(systemClaudePath);
-      const result = buildClaudeDetectionResult(systemClaudePath, validation, 'system-path', 'Using system Claude CLI');
+    const systemIFlowPath = findExecutable('iflow');
+    if (systemIFlowPath) {
+      const validation = this.validateIFlow(systemIFlowPath);
+      const result = buildIFlowDetectionResult(systemIFlowPath, validation, 'system-path', 'Using system iFlow CLI');
       if (result) return result;
     }
 
     // 4. Windows where.exe detection (Windows only - most reliable for custom installs)
     if (process.platform === 'win32') {
-      const whereClaudePath = findWindowsExecutableViaWhere('claude', '[Claude CLI]');
-      if (whereClaudePath) {
-        const validation = this.validateClaude(whereClaudePath);
-        const result = buildClaudeDetectionResult(whereClaudePath, validation, 'system-path', 'Using Windows Claude CLI');
+      const whereIFlowPath = findWindowsExecutableViaWhere('iflow', '[iFlow CLI]');
+      if (whereIFlowPath) {
+        const validation = this.validateIFlow(whereIFlowPath);
+        const result = buildIFlowDetectionResult(whereIFlowPath, validation, 'system-path', 'Using Windows iFlow CLI');
         if (result) return result;
       }
     }
@@ -776,24 +776,24 @@ class CLIToolManager {
           const versionNames = sortNvmVersionDirs(nodeVersions);
 
           for (const versionName of versionNames) {
-            const nvmClaudePath = path.join(paths.nvmVersionsDir, versionName, 'bin', 'claude');
-            if (existsSync(nvmClaudePath)) {
-              const validation = this.validateClaude(nvmClaudePath);
-              const result = buildClaudeDetectionResult(nvmClaudePath, validation, 'nvm', 'Using NVM Claude CLI');
+            const nvmIFlowPath = path.join(paths.nvmVersionsDir, versionName, 'bin', 'iflow');
+            if (existsSync(nvmIFlowPath)) {
+              const validation = this.validateIFlow(nvmIFlowPath);
+              const result = buildIFlowDetectionResult(nvmIFlowPath, validation, 'nvm', 'Using NVM iFlow CLI');
               if (result) return result;
             }
           }
         }
       } catch (error) {
-        console.warn(`[Claude CLI] Unable to read NVM directory: ${error}`);
+        console.warn(`[iFlow CLI] Unable to read NVM directory: ${error}`);
       }
     }
 
     // 6. Platform-specific standard locations
-    for (const claudePath of paths.platformPaths) {
-      if (existsSync(claudePath)) {
-        const validation = this.validateClaude(claudePath);
-        const result = buildClaudeDetectionResult(claudePath, validation, 'system-path', 'Using Claude CLI');
+    for (const iflowPath of paths.platformPaths) {
+      if (existsSync(iflowPath)) {
+        const validation = this.validateIFlow(iflowPath);
+        const result = buildIFlowDetectionResult(iflowPath, validation, 'system-path', 'Using iFlow CLI');
         if (result) return result;
       }
     }
@@ -802,7 +802,7 @@ class CLIToolManager {
     return {
       found: false,
       source: 'fallback',
-      message: 'Claude CLI not found. Install from https://claude.ai/download',
+      message: 'iFlow CLI not found. Install from https://github.com/iflow-ai/iflow-cli',
     };
   }
 
@@ -810,7 +810,7 @@ class CLIToolManager {
    * Validate Python version and availability
    *
    * Checks that Python executable exists and meets minimum version requirement
-   * (3.10.0+) for claude-agent-sdk compatibility.
+   * (3.10.0+) for iflow-cli-sdk compatibility.
    *
    * @param pythonCmd - The Python command to validate
    * @returns Validation result with version information
@@ -928,12 +928,12 @@ class CLIToolManager {
   }
 
   /**
-   * Validate Claude CLI availability and version
+   * Validate iFlow CLI availability and version
    *
-   * @param claudeCmd - The Claude CLI command to validate
+   * @param claudeCmd - The iFlow CLI command to validate
    * @returns Validation result with version information
    */
-  private validateClaude(claudeCmd: string): ToolValidation {
+  private validateIFlow(claudeCmd: string): ToolValidation {
     try {
       const trimmedCmd = claudeCmd.trim();
       const unquotedCmd =
@@ -953,7 +953,7 @@ class CLIToolManager {
         if (!isSecurePath(unquotedCmd)) {
           return {
             valid: false,
-            message: `Claude CLI path failed security validation: ${unquotedCmd}`,
+            message: `iFlow CLI path failed security validation: ${unquotedCmd}`,
           };
         }
         const cmdExe = process.env.ComSpec
@@ -982,19 +982,19 @@ class CLIToolManager {
         ).trim();
       }
 
-      // Claude CLI version output format: "claude-code version X.Y.Z" or similar
+      // iFlow CLI version output format: "claude-code version X.Y.Z" or similar
       const match = version.match(/(\d+\.\d+\.\d+)/);
       const versionStr = match ? match[1] : version.split('\n')[0];
 
       return {
         valid: true,
         version: versionStr,
-        message: `Claude CLI ${versionStr} is available`,
+        message: `iFlow CLI ${versionStr} is available`,
       };
     } catch (error) {
       return {
         valid: false,
-        message: `Failed to validate Claude CLI: ${error instanceof Error ? error.message : String(error)}`,
+        message: `Failed to validate iFlow CLI: ${error instanceof Error ? error.message : String(error)}`,
       };
     }
   }
@@ -1049,8 +1049,8 @@ class CLIToolManager {
    */
   private async detectToolPathAsync(tool: CLITool): Promise<ToolDetectionResult> {
     switch (tool) {
-      case 'claude':
-        return this.detectClaudeAsync();
+      case 'iflow':
+        return this.detectIFlowAsync();
       case 'python':
         return this.detectPythonAsync();
       case 'git':
@@ -1067,12 +1067,12 @@ class CLIToolManager {
   }
 
   /**
-   * Validate Claude CLI asynchronously (non-blocking)
+   * Validate iFlow CLI asynchronously (non-blocking)
    *
-   * @param claudeCmd - The Claude CLI command to validate
+   * @param claudeCmd - The iFlow CLI command to validate
    * @returns Promise resolving to validation result
    */
-  private async validateClaudeAsync(claudeCmd: string): Promise<ToolValidation> {
+  private async validateIFlowAsync(claudeCmd: string): Promise<ToolValidation> {
     try {
       const trimmedCmd = claudeCmd.trim();
       const unquotedCmd =
@@ -1092,7 +1092,7 @@ class CLIToolManager {
         if (!isSecurePath(unquotedCmd)) {
           return {
             valid: false,
-            message: `Claude CLI path failed security validation: ${unquotedCmd}`,
+            message: `iFlow CLI path failed security validation: ${unquotedCmd}`,
           };
         }
         const cmdExe = process.env.ComSpec
@@ -1126,12 +1126,12 @@ class CLIToolManager {
       return {
         valid: true,
         version: versionStr,
-        message: `Claude CLI ${versionStr} is available`,
+        message: `iFlow CLI ${versionStr} is available`,
       };
     } catch (error) {
       return {
         valid: false,
-        message: `Failed to validate Claude CLI: ${error instanceof Error ? error.message : String(error)}`,
+        message: `Failed to validate iFlow CLI: ${error instanceof Error ? error.message : String(error)}`,
       };
     }
   }
@@ -1259,7 +1259,7 @@ class CLIToolManager {
   }
 
   /**
-   * Detect Claude CLI asynchronously (non-blocking)
+   * Detect iFlow CLI asynchronously (non-blocking)
    *
    * Priority order:
    * 1. User configuration (if valid for current platform)
@@ -1271,55 +1271,55 @@ class CLIToolManager {
    *
    * @returns Promise resolving to detection result
    */
-  private async detectClaudeAsync(): Promise<ToolDetectionResult> {
+  private async detectIFlowAsync(): Promise<ToolDetectionResult> {
     const homeDir = os.homedir();
-    const paths = getClaudeDetectionPaths(homeDir);
+    const paths = getIFlowDetectionPaths(homeDir);
 
     // 1. User configuration
-    if (this.userConfig.claudePath) {
-      if (isWrongPlatformPath(this.userConfig.claudePath)) {
+    if (this.userConfig.iflowPath) {
+      if (isWrongPlatformPath(this.userConfig.iflowPath)) {
         console.warn(
-          `[Claude CLI] User-configured path is from different platform, ignoring: ${this.userConfig.claudePath}`
+          `[iFlow CLI] User-configured path is from different platform, ignoring: ${this.userConfig.iflowPath}`
         );
-      } else if (process.platform === 'win32' && !isSecurePath(this.userConfig.claudePath)) {
+      } else if (process.platform === 'win32' && !isSecurePath(this.userConfig.iflowPath)) {
         console.warn(
-          `[Claude CLI] User-configured path failed security validation, ignoring: ${this.userConfig.claudePath}`
+          `[iFlow CLI] User-configured path failed security validation, ignoring: ${this.userConfig.iflowPath}`
         );
       } else {
-        const validation = await this.validateClaudeAsync(this.userConfig.claudePath);
-        const result = buildClaudeDetectionResult(
-          this.userConfig.claudePath, validation, 'user-config', 'Using user-configured Claude CLI'
+        const validation = await this.validateIFlowAsync(this.userConfig.iflowPath);
+        const result = buildIFlowDetectionResult(
+          this.userConfig.iflowPath, validation, 'user-config', 'Using user-configured iFlow CLI'
         );
         if (result) return result;
-        console.warn(`[Claude CLI] User-configured path invalid: ${validation.message}`);
+        console.warn(`[iFlow CLI] User-configured path invalid: ${validation.message}`);
       }
     }
 
     // 2. Homebrew (macOS)
     if (process.platform === 'darwin') {
-      for (const claudePath of paths.homebrewPaths) {
-        if (await existsAsync(claudePath)) {
-          const validation = await this.validateClaudeAsync(claudePath);
-          const result = buildClaudeDetectionResult(claudePath, validation, 'homebrew', 'Using Homebrew Claude CLI');
+      for (const iflowPath of paths.homebrewPaths) {
+        if (await existsAsync(iflowPath)) {
+          const validation = await this.validateIFlowAsync(iflowPath);
+          const result = buildIFlowDetectionResult(iflowPath, validation, 'homebrew', 'Using Homebrew iFlow CLI');
           if (result) return result;
         }
       }
     }
 
     // 3. System PATH (augmented) - using async findExecutable
-    const systemClaudePath = await findExecutableAsync('claude');
-    if (systemClaudePath) {
-      const validation = await this.validateClaudeAsync(systemClaudePath);
-      const result = buildClaudeDetectionResult(systemClaudePath, validation, 'system-path', 'Using system Claude CLI');
+    const systemIFlowPath = await findExecutableAsync('iflow');
+    if (systemIFlowPath) {
+      const validation = await this.validateIFlowAsync(systemIFlowPath);
+      const result = buildIFlowDetectionResult(systemIFlowPath, validation, 'system-path', 'Using system iFlow CLI');
       if (result) return result;
     }
 
     // 4. Windows where.exe detection (async, non-blocking)
     if (process.platform === 'win32') {
-      const whereClaudePath = await findWindowsExecutableViaWhereAsync('claude', '[Claude CLI]');
-      if (whereClaudePath) {
-        const validation = await this.validateClaudeAsync(whereClaudePath);
-        const result = buildClaudeDetectionResult(whereClaudePath, validation, 'system-path', 'Using Windows Claude CLI');
+      const whereIFlowPath = await findWindowsExecutableViaWhereAsync('iflow', '[iFlow CLI]');
+      if (whereIFlowPath) {
+        const validation = await this.validateIFlowAsync(whereIFlowPath);
+        const result = buildIFlowDetectionResult(whereIFlowPath, validation, 'system-path', 'Using Windows iFlow CLI');
         if (result) return result;
       }
     }
@@ -1332,24 +1332,24 @@ class CLIToolManager {
           const versionNames = sortNvmVersionDirs(nodeVersions);
 
           for (const versionName of versionNames) {
-            const nvmClaudePath = path.join(paths.nvmVersionsDir, versionName, 'bin', 'claude');
-            if (await existsAsync(nvmClaudePath)) {
-              const validation = await this.validateClaudeAsync(nvmClaudePath);
-              const result = buildClaudeDetectionResult(nvmClaudePath, validation, 'nvm', 'Using NVM Claude CLI');
+            const nvmIFlowPath = path.join(paths.nvmVersionsDir, versionName, 'bin', 'iflow');
+            if (await existsAsync(nvmIFlowPath)) {
+              const validation = await this.validateIFlowAsync(nvmIFlowPath);
+              const result = buildIFlowDetectionResult(nvmIFlowPath, validation, 'nvm', 'Using NVM iFlow CLI');
               if (result) return result;
             }
           }
         }
       } catch (error) {
-        console.warn(`[Claude CLI] Unable to read NVM directory: ${error}`);
+        console.warn(`[iFlow CLI] Unable to read NVM directory: ${error}`);
       }
     }
 
     // 6. Platform-specific standard locations
-    for (const claudePath of paths.platformPaths) {
-      if (await existsAsync(claudePath)) {
-        const validation = await this.validateClaudeAsync(claudePath);
-        const result = buildClaudeDetectionResult(claudePath, validation, 'system-path', 'Using Claude CLI');
+    for (const iflowPath of paths.platformPaths) {
+      if (await existsAsync(iflowPath)) {
+        const validation = await this.validateIFlowAsync(iflowPath);
+        const result = buildIFlowDetectionResult(iflowPath, validation, 'system-path', 'Using iFlow CLI');
         if (result) return result;
       }
     }
@@ -1358,7 +1358,7 @@ class CLIToolManager {
     return {
       found: false,
       source: 'fallback',
-      message: 'Claude CLI not found. Install from https://claude.ai/download',
+      message: 'iFlow CLI not found. Install from https://github.com/iflow-ai/iflow-cli',
     };
   }
 
@@ -1850,8 +1850,8 @@ export function clearToolCache(): void {
  * import { isPathFromWrongPlatform } from './cli-tool-manager';
  *
  * // On macOS, this returns true for Windows paths
- * isPathFromWrongPlatform('C:\\Program Files\\claude.exe'); // true
- * isPathFromWrongPlatform('/usr/local/bin/claude'); // false
+ * isPathFromWrongPlatform('C:\\Program Files\\iflow.exe'); // true
+ * isPathFromWrongPlatform('/usr/local/bin/iflow'); // false
  * ```
  */
 export function isPathFromWrongPlatform(pathStr: string | undefined): boolean {
@@ -1875,7 +1875,7 @@ export function isPathFromWrongPlatform(pathStr: string | undefined): boolean {
  * ```typescript
  * import { getToolPathAsync } from './cli-tool-manager';
  *
- * const claudePath = await getToolPathAsync('claude');
+ * const iflowPath = await getToolPathAsync('iflow');
  * ```
  */
 export async function getToolPathAsync(tool: CLITool): Promise<string> {
@@ -1888,7 +1888,7 @@ export async function getToolPathAsync(tool: CLITool): Promise<string> {
  * Call this during app startup to detect tools in the background.
  * Subsequent calls to getToolPath/getToolPathAsync will use cached values.
  *
- * @param tools - Array of tools to pre-warm (defaults to ['claude'])
+ * @param tools - Array of tools to pre-warm (defaults to ['iflow'])
  *
  * @example
  * ```typescript
@@ -1897,11 +1897,11 @@ export async function getToolPathAsync(tool: CLITool): Promise<string> {
  * // In app startup
  * app.whenReady().then(() => {
  *   // ... setup code ...
- *   preWarmToolCache(['claude', 'git', 'gh']);
+ *   preWarmToolCache(['iflow', 'git', 'gh']);
  * });
  * ```
  */
-export async function preWarmToolCache(tools: CLITool[] = ['claude']): Promise<void> {
+export async function preWarmToolCache(tools: CLITool[] = ['iflow']): Promise<void> {
   console.warn('[CLI Tools] Pre-warming cache for:', tools.join(', '));
   await Promise.all(tools.map(tool => cliToolManager.getToolPathAsync(tool)));
   console.warn('[CLI Tools] Cache pre-warming complete');

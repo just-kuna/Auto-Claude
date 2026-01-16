@@ -1,8 +1,10 @@
-# Auto Claude
+# Auto-iFlow
 
 **Autonomous multi-agent coding framework that plans, builds, and validates software for you.**
 
-![Auto Claude Kanban Board](.github/assets/Auto-Claude-Kanban.png)
+> 🚀 **Now powered by iFlow CLI** - A FREE AI assistant that runs in your terminal!
+
+![Auto-iFlow Kanban Board](.github/assets/Auto-Claude-Kanban.png)
 
 [![License](https://img.shields.io/badge/license-AGPL--3.0-green?style=flat-square)](./agpl-3.0.txt)
 [![Discord](https://img.shields.io/badge/Discord-Join%20Community-5865F2?style=flat-square&logo=discord&logoColor=white)](https://discord.gg/KCXaPBr4Dj)
@@ -55,19 +57,22 @@
 
 ## Requirements
 
-- **Claude Pro/Max subscription** - [Get one here](https://claude.ai/upgrade)
-- **Claude Code CLI** - `npm install -g @anthropic-ai/claude-code`
+- **iFlow CLI** - `npm install -g @iflow-ai/iflow-cli` (FREE!)
+- **iFlow API Key** - Get your free key at [iflow.cn](https://iflow.cn)
 - **Git repository** - Your project must be initialized as a git repo
+
+> 💡 **No subscription required!** iFlow provides free access to powerful AI models including Qwen3-Coder, Kimi K2, and DeepSeek v3.
 
 ---
 
 ## Quick Start
 
-1. **Download and install** the app for your platform
-2. **Open your project** - Select a git repository folder
-3. **Connect Claude** - The app will guide you through OAuth setup
-4. **Create a task** - Describe what you want to build
-5. **Watch it work** - Agents plan, code, and validate autonomously
+1. **Install iFlow CLI** - `npm install -g @iflow-ai/iflow-cli`
+2. **Get your API key** - Run `iflow` and follow the login prompts (or get key at [iflow.cn](https://iflow.cn))
+3. **Download and install** the app for your platform
+4. **Open your project** - Select a git repository folder
+5. **Create a task** - Describe what you want to build
+6. **Watch it work** - Agents plan, code, and validate autonomously
 
 ---
 

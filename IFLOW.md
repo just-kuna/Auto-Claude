@@ -1,12 +1,12 @@
-# CLAUDE.md
+# IFLOW.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to iFlow CLI (iflow.cn) when working with code in this repository.
 
 ## Project Overview
 
-Auto Claude is a multi-agent autonomous coding framework that builds software through coordinated AI agent sessions. It uses the Claude Agent SDK to run agents in isolated workspaces with security controls.
+Auto-iFlow is a multi-agent autonomous coding framework that builds software through coordinated AI agent sessions. It uses the iFlow CLI SDK to run agents in isolated workspaces with security controls.
 
-**CRITICAL: All AI interactions use the Claude Agent SDK (`claude-agent-sdk` package), NOT the Anthropic API directly.**
+**CRITICAL: All AI interactions use the iFlow CLI SDK (`iflow-cli-sdk` package), NOT the Anthropic API directly.**
 
 ## Project Structure
 
@@ -57,8 +57,8 @@ cd apps/backend && uv venv && uv pip install -r requirements.txt
 cd apps/frontend && npm install
 
 # Set up OAuth token
-claude setup-token
-# Add to apps/backend/.env: CLAUDE_CODE_OAUTH_TOKEN=your-token
+iflow
+# Add to apps/backend/.env: IFLOW_API_KEY=your-token
 ```
 
 ### Creating and Running Specs
@@ -170,7 +170,7 @@ See [RELEASE.md](RELEASE.md) for detailed release process documentation.
 ### Key Components (apps/backend/)
 
 **Core Infrastructure:**
-- **core/client.py** - Claude Agent SDK client factory with security hooks and tool permissions
+- **core/client.py** - iFlow CLI SDK client factory with security hooks and tool permissions
 - **core/security.py** - Dynamic command allowlisting based on detected project stack
 - **core/auth.py** - OAuth token management for Claude SDK authentication
 - **agents/** - Agent implementations (planner, coder, qa_reviewer, qa_fixer)
@@ -227,7 +227,7 @@ Each spec in `.auto-claude/specs/XXX-name/` contains:
 
 ### Branching & Worktree Strategy
 
-Auto Claude uses git worktrees for isolated builds. All branches stay LOCAL until user explicitly pushes:
+Auto-iFlow uses git worktrees for isolated builds. All branches stay LOCAL until user explicitly pushes:
 
 ```
 main (user's branch)
@@ -274,13 +274,13 @@ Three-layer defense:
 
 Security profile cached in `.auto-claude-security.json`.
 
-### Claude Agent SDK Integration
+### iFlow CLI SDK Integration
 
-**CRITICAL: Auto Claude uses the Claude Agent SDK for ALL AI interactions. Never use the Anthropic API directly.**
+**CRITICAL: Auto-iFlow uses the iFlow CLI SDK for ALL AI interactions. Never use the Anthropic API directly.**
 
 **Client Location:** `apps/backend/core/client.py`
 
-The `create_client()` function creates a configured `ClaudeSDKClient` instance with:
+The `create_client()` function creates a configured `IFlowClient` instance with:
 - Multi-layered security (sandbox, permissions, security hooks)
 - Agent-specific tool permissions (planner, coder, qa_reviewer, qa_fixer)
 - Dynamic MCP server integration based on project capabilities
@@ -294,7 +294,7 @@ from core.client import create_client
 client = create_client(
     project_dir=project_dir,
     spec_dir=spec_dir,
-    model="claude-sonnet-4-5-20250929",
+    model="Qwen3-Coder",
     agent_type="coder",
     max_thinking_tokens=None  # or 5000/10000/16000
 )
@@ -324,7 +324,7 @@ response = client.create_agent_session(
 
 **Graphiti Memory (Mandatory)** - `integrations/graphiti/`
 
-Auto Claude uses Graphiti as its primary memory system with embedded LadybugDB (no Docker required):
+Auto-iFlow uses Graphiti as its primary memory system with embedded LadybugDB (no Docker required):
 
 - **Graph database with semantic search** - Knowledge graph for cross-session context
 - **Session insights** - Patterns, gotchas, discoveries automatically extracted
